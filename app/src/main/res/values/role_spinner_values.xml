@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="role_array">
+        <item>Scrum Master</item>
+        <item>Project Owner</item>
+        <item>Development Team</item>
+    </string-array>
+</resources>
