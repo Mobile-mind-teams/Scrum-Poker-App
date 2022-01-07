@@ -67,7 +67,7 @@ class SignUpActivity: AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
                     addUserToDataBase(email, password, mAuth.currentUser?.uid!!, userName, roleSelected)
 
-                    val intent = Intent(this@SignUpActivity, MainActivity::class.java)
+                    val intent = Intent(this@SignUpActivity, LoginActivity::class.java)
                     startActivity(intent)
                 } else {
                     Toast.makeText(this@SignUpActivity,"Algo salio mal", Toast.LENGTH_SHORT).show()
