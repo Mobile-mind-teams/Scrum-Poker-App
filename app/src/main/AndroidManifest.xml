@@ -20,6 +20,18 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter android:label="@string/deep_link_app">
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="https"
+                    android:host="www.scrum-poker.com"
+                    android:pathPrefix="/open"/>
+            </intent-filter>
         </activity>
         <activity android:name=".view.activity.MainActivity" android:theme="@style/AppTheme.NoActionBar"/>
 

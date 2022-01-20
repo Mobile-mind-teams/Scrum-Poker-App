@@ -3,6 +3,7 @@
     <string name="image_description">Splash Screen Image</string>
     <string name="from">from</string>
     <string name="arkusmobileteam">Arkusnexus Mobile Team</string>
+    <string name="deep_link_app">ScrumPokerApp</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
