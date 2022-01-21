@@ -35,10 +35,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".view.activity.MainActivity" android:theme="@style/AppTheme.NoActionBar"/>
-
-        <activity android:name=".view.activity.LoginActivity" android:theme="@style/AppTheme.NoActionBar"/>
-
-        <activity android:name=".view.activity.SignUpActivity" android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>
