@@ -1,6 +1,7 @@
 package com.example.scrumpokerapp.view.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,30 +11,36 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import com.example.scrumpokerapp.R
+import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentLogInBinding
-import com.example.scrumpokerapp.viewmodel.AuthViewModel
+import com.example.scrumpokerapp.viewmodel.*
 
 class LogInFragment : Fragment() {
 
-    private lateinit var logInViewModel: AuthViewModel
+    private lateinit var logInViewModel: LogInViewModel
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        logInViewModel = activity?.run {
-            ViewModelProviders.of(this)[AuthViewModel::class.java]
-        } ?: throw Exception("Invalid Fragment")
+    companion object {
+        fun newInstance() : Fragment {
+            return  LogInFragment()
+        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         val binding: FragmentLogInBinding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_log_in,
             container,
             false
         )
+
+        logInViewModel = ViewModelProviders.of(
+            this,
+            LogInViewModelFactory(requireActivity().application)
+        )[LogInViewModel::class.java]
 
         binding.btnLogIn.setOnClickListener {
             logInViewModel.login(

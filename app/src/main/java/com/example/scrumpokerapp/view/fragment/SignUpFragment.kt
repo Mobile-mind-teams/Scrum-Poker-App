@@ -1,10 +1,12 @@
 package com.example.scrumpokerapp.view.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -14,25 +16,24 @@ import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentSignUpBinding
 import com.example.scrumpokerapp.service.request.UsersRegisterRequest
-import com.example.scrumpokerapp.viewmodel.AuthViewModel
+import com.example.scrumpokerapp.viewmodel.SignUpViewModel
+import com.example.scrumpokerapp.viewmodel.SignUpViewModelFactory
 
 class SignUpFragment : Fragment() {
 
-    private lateinit var sigUpViewModel: AuthViewModel
-    private lateinit var apiController: ApiController
+    private lateinit var sigUpViewModel: SignUpViewModel
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        apiController = ApiController()
-        sigUpViewModel = activity?.run {
-            ViewModelProviders.of(this)[AuthViewModel::class.java]
-        } ?: throw Exception("Invalid Fragment")
+    companion object {
+        fun newInstance() : Fragment {
+            return  SignUpFragment()
+        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         val binding: FragmentSignUpBinding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_sign_up,
@@ -49,18 +50,30 @@ class SignUpFragment : Fragment() {
             binding.spRole.adapter = adapter
         }
 
+        sigUpViewModel = ViewModelProviders.of(
+            this,
+            SignUpViewModelFactory(ApiController(), requireActivity().application)
+        )[SignUpViewModel::class.java]
+
         binding.btnSignUp.setOnClickListener {
-            sigUpViewModel.register(
-                UsersRegisterRequest(
-                    binding.etEmail.text.toString(),
-                    binding.etPassword.text.toString(),
-                    binding.spRole.selectedItemPosition,
-                    "",
-                    binding.etUserName.text.toString()
-                )
+
+            val user = UsersRegisterRequest(
+                binding.etEmail.text.toString(),
+                binding.etPassword.text.toString(),
+                binding.spRole.selectedItemPosition,
+                "",
+                binding.etUserName.text.toString()
             )
 
+            sigUpViewModel.register(user)
+
             sigUpViewModel.userData.observe(viewLifecycleOwner, Observer {
+                if (it != null){
+                    sigUpViewModel.postUser(user)
+                }
+            })
+
+            sigUpViewModel.insertUserResponseData.observe(viewLifecycleOwner, Observer {
                 if (it != null){
                     binding.root.findNavController().navigate(R.id.action_signUpFragment_to_logInFragment2)
                 }
