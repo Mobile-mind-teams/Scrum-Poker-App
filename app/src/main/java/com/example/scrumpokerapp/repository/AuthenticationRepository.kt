@@ -13,15 +13,18 @@ class AuthenticationRepository {
 
     var application: Application
     var firebaseMutableLiveData: MutableLiveData<FirebaseUser>
+    var logoutStatusMutableLiveData: MutableLiveData<Boolean>
     var mAuth: FirebaseAuth
 
     constructor(application: Application) {
         this.application = application
         firebaseMutableLiveData = MutableLiveData()
         mAuth = FirebaseAuth.getInstance()
+        logoutStatusMutableLiveData = MutableLiveData()
 
         if (mAuth.currentUser != null){
             firebaseMutableLiveData.postValue(mAuth.currentUser)
+            logoutStatusMutableLiveData.postValue(false)
         }
     }
 
@@ -49,6 +52,12 @@ class AuthenticationRepository {
                     Toast.makeText(application,"Error de usuario y contraseña", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+
+    fun logout(){
+        mAuth.signOut()
+        logoutStatusMutableLiveData.postValue(true)
+        Toast.makeText(application,"Nos vemos!", Toast.LENGTH_SHORT).show()
     }
 
 }
