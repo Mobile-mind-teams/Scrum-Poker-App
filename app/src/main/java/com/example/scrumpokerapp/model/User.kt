@@ -53,12 +53,12 @@ class User {
 
     override fun toString(): String {
         return "User => {\n" +
-                "email: ${UserProfile.email},\n" +
-                "password: ${UserProfile.password},\n" +
-                "uid: ${UserProfile.uid},\n" +
-                "role: ${UserProfile.role},\n" +
-                "user_name: ${UserProfile.user_name},\n" +
-                "doc_id: ${UserProfile.doc_id}," +
+                "email: ${email},\n" +
+                "password: ${password},\n" +
+                "uid: ${uid},\n" +
+                "role: ${role},\n" +
+                "user_name: ${user_name},\n" +
+                "doc_id: ${doc_id}," +
                 "\n}"
     }
 }

@@ -61,7 +61,7 @@ class HomeFragment : Fragment() {
 
         homeViewModel.userLoggedData.observe(viewLifecycleOwner, Observer {
             if (it != null){
-                binding.tvUserLogged.text = it.value.toString()
+                binding.tvUserLogged.text = it.data.get(0).toString()
             }
         })
 

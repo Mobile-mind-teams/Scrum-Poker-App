@@ -2,66 +2,55 @@ package com.example.scrumpokerapp.controller
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.example.scrumpokerapp.model.User
-import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.service.ApiClient
 import com.example.scrumpokerapp.service.request.UsersRegisterRequest
-import com.example.scrumpokerapp.service.response.AddUserResponse
-import com.example.scrumpokerapp.service.response.GetUsersResponse
-import com.google.firebase.auth.FirebaseUser
+import com.example.scrumpokerapp.service.response.UsersResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class ApiController {
     val service = ApiClient().initRetrofit()
-    val createUserMutableLiveData: MutableLiveData<AddUserResponse?>
-    val userMutableLiveData: MutableLiveData<GetUsersResponse?>
+    val userResponseMutableLiveData : MutableLiveData<UsersResponse?>
 
     constructor(){
-        createUserMutableLiveData = MutableLiveData()
-        userMutableLiveData = MutableLiveData()
+        userResponseMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
-        service.getUserById(uid).enqueue(object : Callback<GetUsersResponse>{
-            override fun onResponse(
-                call: Call<GetUsersResponse>,
-                response: Response<GetUsersResponse>
-            ) {
+        service.getUserById(uid).enqueue(object : Callback<UsersResponse>{
+            override fun onResponse(call: Call<UsersResponse>, response: Response<UsersResponse>) {
                 if (response.isSuccessful && response.body() != null){
-                    Log.i("User Data: ","GET: " + 200 + " " + response.body())
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data?.get(0))
                 } else {
-                    Log.i("User Data: ", "GET: " + 200 + " Not Found!")
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }
 
-                userMutableLiveData.postValue(response.body())
+                userResponseMutableLiveData.postValue(response.body())
             }
 
-            override fun onFailure(call: Call<GetUsersResponse>, t: Throwable) {
-                userMutableLiveData.postValue(null)
+            override fun onFailure(call: Call<UsersResponse>, t: Throwable) {
+                userResponseMutableLiveData.postValue(null)
                 Log.i("User Data: ","GET: " + 500 + " " + t.stackTraceToString())
             }
         })
     }
 
     fun postUsersApi(usersRegisterRequest: UsersRegisterRequest) {
-        service.postUsers(usersRegisterRequest).enqueue(object : Callback<AddUserResponse>{
-            override fun onResponse(
-                call: Call<AddUserResponse>,
-                response: Response<AddUserResponse>
-            ) {
+        service.postUsers(usersRegisterRequest).enqueue(object : Callback<UsersResponse>{
+
+            override fun onResponse(call: Call<UsersResponse>, response: Response<UsersResponse>) {
                 if (response.isSuccessful){
-                    Log.i("User Data: ","POST: " + 200 + " " + response.body()?.value?.uid)
+                    Log.i("${response.body()?.collection} Data POST: "," ${response.body()?.message} " + 200 + " " + response.body()?.data?.get(0))
                 } else {
-                    Log.i("User Data: ","POST: " + 200 + " Nothing added!")
+                    Log.i("${response.body()?.collection} Data POST: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }
 
-                createUserMutableLiveData.postValue(response.body())
+                userResponseMutableLiveData.postValue(response.body())
             }
 
-            override fun onFailure(call: Call<AddUserResponse>, t: Throwable) {
-                createUserMutableLiveData.postValue(null)
+            override fun onFailure(call: Call<UsersResponse>, t: Throwable) {
+                userResponseMutableLiveData.postValue(null)
                 Log.i("User Data: ","POST: " + 500 + " " + t.stackTrace.toString())
             }
         })

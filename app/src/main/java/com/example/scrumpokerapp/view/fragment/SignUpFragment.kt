@@ -70,11 +70,6 @@ class SignUpFragment : Fragment() {
             sigUpViewModel.userData.observe(viewLifecycleOwner, Observer {
                 if (it != null){
                     sigUpViewModel.postUser(user)
-                }
-            })
-
-            sigUpViewModel.insertUserResponseData.observe(viewLifecycleOwner, Observer {
-                if (it != null){
                     binding.root.findNavController().navigate(R.id.action_signUpFragment_to_logInFragment2)
                 }
             })
