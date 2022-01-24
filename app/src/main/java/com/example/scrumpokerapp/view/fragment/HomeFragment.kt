@@ -52,22 +52,16 @@ class HomeFragment : Fragment() {
                 homeViewModel.getUserById(
                     homeViewModel.getLoggedUserUid()
                 )
-
-                /*homeViewModel.getAllUserSessions(
-                    homeViewModel.getLoggedUserUid()
-                )*/
-
-                homeViewModel.getAllSessions()
             }
         })
 
-        /*homeViewModel.userLoggedData.observe(viewLifecycleOwner, Observer {
+        homeViewModel.userLoggedData.observe(viewLifecycleOwner, Observer {
             if (it != null){
-                binding.tvUserLogged.text = it.data.get(0).toString()
+                homeViewModel.getSessionList()
             }
-        })*/
+        })
 
-        /*homeViewModel.historySessionListData.observe(viewLifecycleOwner, Observer {
+        homeViewModel.historySessionListData.observe(viewLifecycleOwner, Observer {
             if (it != null){
                 var txt = ""
                 it.data.forEach {
@@ -76,7 +70,7 @@ class HomeFragment : Fragment() {
 
                 binding.tvUserLogged.text = txt
             }
-        })*/
+        })
 
         homeViewModel.sesionListData.observe(viewLifecycleOwner, Observer {
             if (it != null){

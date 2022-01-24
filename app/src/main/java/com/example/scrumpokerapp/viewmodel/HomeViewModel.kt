@@ -49,4 +49,14 @@ class HomeViewModel (
         return userLoggedData.value?.data?.get(0)
     }
 
+    fun getSessionList(){
+        if (userLoggedData.value?.data?.get(0)!!.isProductOwner()){
+            getAllSessions()
+        } else {
+            getAllUserSessions(
+                getLoggedUserUid()
+            )
+        }
+    }
+
 }

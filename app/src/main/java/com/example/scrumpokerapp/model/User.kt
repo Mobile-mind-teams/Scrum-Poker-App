@@ -63,6 +63,6 @@ class User {
     }
 
     fun isProductOwner(): Boolean {
-        return UserProfile.role == 1
+        return role == 1
     }
 }
