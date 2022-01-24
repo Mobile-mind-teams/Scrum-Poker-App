@@ -7,6 +7,7 @@ import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.controller.ApiSessionController
 import com.example.scrumpokerapp.model.User
 import com.example.scrumpokerapp.repository.AuthenticationRepository
+import com.example.scrumpokerapp.service.response.SessionResponse
 import com.example.scrumpokerapp.service.response.SessionsHistoryResponse
 import com.example.scrumpokerapp.service.response.UsersResponse
 import com.google.firebase.auth.FirebaseUser
@@ -20,7 +21,8 @@ class HomeViewModel (
     val authenticationRepository: AuthenticationRepository = AuthenticationRepository(application)
     val userData: MutableLiveData<FirebaseUser> = authenticationRepository.firebaseMutableLiveData
     val userLoggedData : MutableLiveData<UsersResponse?> = apiController.userResponseMutableLiveData
-    val sessionListData : MutableLiveData<SessionsHistoryResponse?> = apiSessionController.sessionHistoryResponseMutableLiveData
+    val historySessionListData : MutableLiveData<SessionsHistoryResponse?> = apiSessionController.sessionHistoryResponseMutableLiveData
+    val sesionListData: MutableLiveData<SessionResponse?> = apiSessionController.sessionResponseMutableLiveData
     val logOutStatus: MutableLiveData<Boolean> = authenticationRepository.logoutStatusMutableLiveData
 
     fun getLoggedUserUid() : String {
@@ -39,9 +41,9 @@ class HomeViewModel (
         apiSessionController.getAllUserSessions(uid)
     }
 
-    /*fun getAllSessions(){
+    fun getAllSessions(){
         apiSessionController.getAllSessions()
-    }*/
+    }
 
     fun getCurrentUserObject() : User?{
         return userLoggedData.value?.data?.get(0)

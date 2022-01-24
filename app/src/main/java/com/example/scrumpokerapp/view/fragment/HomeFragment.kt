@@ -1,7 +1,6 @@
 package com.example.scrumpokerapp.view.fragment
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,12 +13,8 @@ import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.controller.ApiSessionController
 import com.example.scrumpokerapp.databinding.FragmentHomeBinding
-import com.example.scrumpokerapp.databinding.FragmentLogInBinding
-import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.viewmodel.HomeViewModel
 import com.example.scrumpokerapp.viewmodel.HomeViewModelFactory
-import com.example.scrumpokerapp.viewmodel.LogInViewModel
-import com.example.scrumpokerapp.viewmodel.LogInViewModelFactory
 
 class HomeFragment : Fragment() {
 
@@ -58,11 +53,11 @@ class HomeFragment : Fragment() {
                     homeViewModel.getLoggedUserUid()
                 )
 
-                homeViewModel.getAllUserSessions(
+                /*homeViewModel.getAllUserSessions(
                     homeViewModel.getLoggedUserUid()
-                )
+                )*/
 
-                /*homeViewModel.getAllSessions()*/
+                homeViewModel.getAllSessions()
             }
         })
 
@@ -72,7 +67,18 @@ class HomeFragment : Fragment() {
             }
         })*/
 
-        homeViewModel.sessionListData.observe(viewLifecycleOwner, Observer {
+        /*homeViewModel.historySessionListData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                var txt = ""
+                it.data.forEach {
+                    txt += it.toItemCard() + "\n"
+                }
+
+                binding.tvUserLogged.text = txt
+            }
+        })*/
+
+        homeViewModel.sesionListData.observe(viewLifecycleOwner, Observer {
             if (it != null){
                 var txt = ""
                 it.data.forEach {
