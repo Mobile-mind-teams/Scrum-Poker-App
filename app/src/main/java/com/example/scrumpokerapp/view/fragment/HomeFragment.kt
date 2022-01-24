@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
+import com.example.scrumpokerapp.controller.ApiSessionController
 import com.example.scrumpokerapp.databinding.FragmentHomeBinding
 import com.example.scrumpokerapp.databinding.FragmentLogInBinding
 import com.example.scrumpokerapp.persistance.UserProfile
@@ -44,7 +45,7 @@ class HomeFragment : Fragment() {
 
         homeViewModel = ViewModelProviders.of(
             this,
-            HomeViewModelFactory(ApiController(),requireActivity().application)
+            HomeViewModelFactory(ApiController(), ApiSessionController(),requireActivity().application)
         )[HomeViewModel::class.java]
 
         binding.tvUserLogged.setOnClickListener{
@@ -56,12 +57,29 @@ class HomeFragment : Fragment() {
                 homeViewModel.getUserById(
                     homeViewModel.getLoggedUserUid()
                 )
+
+                homeViewModel.getAllUserSessions(
+                    homeViewModel.getLoggedUserUid()
+                )
+
+                /*homeViewModel.getAllSessions()*/
             }
         })
 
-        homeViewModel.userLoggedData.observe(viewLifecycleOwner, Observer {
+        /*homeViewModel.userLoggedData.observe(viewLifecycleOwner, Observer {
             if (it != null){
                 binding.tvUserLogged.text = it.data.get(0).toString()
+            }
+        })*/
+
+        homeViewModel.sessionListData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                var txt = ""
+                it.data.forEach {
+                    txt += it.toItemCard() + "\n"
+                }
+
+                binding.tvUserLogged.text = txt
             }
         })
 

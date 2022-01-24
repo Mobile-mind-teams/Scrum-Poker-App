@@ -61,4 +61,8 @@ class User {
                 "doc_id: ${doc_id}," +
                 "\n}"
     }
+
+    fun isProductOwner(): Boolean {
+        return UserProfile.role == 1
+    }
 }
