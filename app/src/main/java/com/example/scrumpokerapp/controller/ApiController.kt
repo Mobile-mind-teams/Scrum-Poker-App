@@ -2,6 +2,7 @@ package com.example.scrumpokerapp.controller
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.service.ApiClient
 import com.example.scrumpokerapp.service.request.UsersRegisterRequest
 import com.example.scrumpokerapp.service.response.UsersResponse
@@ -22,6 +23,16 @@ class ApiController {
             override fun onResponse(call: Call<UsersResponse>, response: Response<UsersResponse>) {
                 if (response.isSuccessful && response.body() != null){
                     Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data?.get(0))
+
+                    UserProfile.setUserProfile(
+                        response.body()?.data?.get(0)?.email.toString(),
+                        response.body()?.data?.get(0)?.password.toString(),
+                        response.body()?.data?.get(0)?.uid.toString(),
+                        response.body()?.data?.get(0)?.role.toString().toInt(),
+                        response.body()?.data?.get(0)?.user_name.toString(),
+                        response.body()?.data?.get(0)?.doc_id.toString()
+                    )
+
                 } else {
                     Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }

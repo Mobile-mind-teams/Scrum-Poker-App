@@ -11,6 +11,14 @@ class Session {
     @SerializedName("session_id") var session_id : String? = null
     @SerializedName("note") var note : String? = null
 
+    constructor(){}
+
+    constructor(project_name: String, project_id: String, session_id: String, status: String){
+        this.project_name = project_name
+        this.project_id = project_id
+        this.session_id = session_id
+        this.status = status
+    }
 
     override fun toString(): String {
         return "Session => {\n" +

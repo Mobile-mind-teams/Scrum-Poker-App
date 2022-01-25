@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.controller.ApiSessionController
-import com.example.scrumpokerapp.model.User
+import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.repository.AuthenticationRepository
 import com.example.scrumpokerapp.service.response.SessionResponse
 import com.example.scrumpokerapp.service.response.SessionsHistoryResponse
@@ -23,7 +23,6 @@ class HomeViewModel (
     val userLoggedData : MutableLiveData<UsersResponse?> = apiController.userResponseMutableLiveData
     val historySessionListData : MutableLiveData<SessionsHistoryResponse?> = apiSessionController.sessionHistoryResponseMutableLiveData
     val sesionListData: MutableLiveData<SessionResponse?> = apiSessionController.sessionResponseMutableLiveData
-    val logOutStatus: MutableLiveData<Boolean> = authenticationRepository.logoutStatusMutableLiveData
 
     fun getLoggedUserUid() : String {
         return userData.value?.uid.toString()
@@ -45,16 +44,12 @@ class HomeViewModel (
         apiSessionController.getAllSessions()
     }
 
-    fun getCurrentUserObject() : User?{
-        return userLoggedData.value?.data?.get(0)
-    }
-
     fun getSessionList(){
-        if (userLoggedData.value?.data?.get(0)!!.isProductOwner()){
+        if (UserProfile.isProductOwner()){
             getAllSessions()
         } else {
             getAllUserSessions(
-                getLoggedUserUid()
+                UserProfile.uid.toString()
             )
         }
     }
