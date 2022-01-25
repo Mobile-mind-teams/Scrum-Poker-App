@@ -13,6 +13,8 @@ import androidx.navigation.findNavController
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentLogInBinding
+import com.example.scrumpokerapp.model.User
+import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.viewmodel.*
 
 class LogInFragment : Fragment() {
@@ -48,11 +50,19 @@ class LogInFragment : Fragment() {
                 binding.etPassword.text.toString()
             )
 
-            logInViewModel.userData.observe(viewLifecycleOwner, Observer {
-                if (it != null){
-                    binding.root.findNavController().navigate(R.id.action_logInFragment_to_homeFragment)
-                }
-            })
+        }
+
+        logInViewModel.userData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                binding.root.findNavController().navigate(R.id.action_logInFragment_to_homeFragment)
+            }
+        })
+
+        if(UserProfile.uid != null){
+            logInViewModel.login(
+                UserProfile.email.toString(),
+                UserProfile.password.toString()
+            )
         }
 
         binding.tvSignUp.setOnClickListener{
