@@ -8,11 +8,9 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
-import com.example.scrumpokerapp.controller.ApiSessionController
 import com.example.scrumpokerapp.databinding.FragmentHomeBinding
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.persistance.UserProfile
@@ -44,7 +42,7 @@ class HomeFragment : Fragment() {
 
         homeViewModel = ViewModelProviders.of(
             this,
-            HomeViewModelFactory(ApiController(), ApiSessionController(),requireActivity().application)
+            HomeViewModelFactory(ApiController(), requireActivity().application)
         )[HomeViewModel::class.java]
 
         binding.fabAddSession.setOnClickListener{
