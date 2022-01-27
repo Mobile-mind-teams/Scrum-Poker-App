@@ -1,10 +1,12 @@
 package com.example.scrumpokerapp.view.fragment
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -41,7 +43,7 @@ class LogInFragment : Fragment() {
 
         logInViewModel = ViewModelProviders.of(
             this,
-            LogInViewModelFactory(requireActivity().application)
+            LogInViewModelFactory(requireActivity().application, ApiController())
         )[LogInViewModel::class.java]
 
         binding.btnLogIn.setOnClickListener {
@@ -54,16 +56,19 @@ class LogInFragment : Fragment() {
 
         logInViewModel.userData.observe(viewLifecycleOwner, Observer {
             if (it != null){
-                binding.root.findNavController().navigate(R.id.action_logInFragment_to_homeFragment)
+                logInViewModel.getUserById(
+                    logInViewModel.userData.value?.uid.toString()
+                )
             }
         })
 
-        if(UserProfile.uid != null){
-            logInViewModel.login(
-                UserProfile.email.toString(),
-                UserProfile.password.toString()
-            )
-        }
+        logInViewModel.userLoggedData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                val bundle : Bundle = Bundle()
+                bundle.putBoolean("role", UserProfile.isProductOwner())
+                binding.root.findNavController().navigate(R.id.action_logInFragment_to_mainActivity, bundle)
+            }
+        })
 
         binding.tvSignUp.setOnClickListener{
             binding.root.findNavController().navigate(R.id.action_logInFragment_to_signUpFragment2)
