@@ -18,6 +18,7 @@ class HomeViewModel (
 
     val authenticationRepository: AuthenticationRepository = AuthenticationRepository(application)
     val userData: MutableLiveData<FirebaseUser> = authenticationRepository.firebaseMutableLiveData
+    val sessionStatus: MutableLiveData<Boolean> = authenticationRepository.logoutStatusMutableLiveData
     val userLoggedData : MutableLiveData<UsersResponse?> = apiController.userResponseMutableLiveData
     val historySessionListData : MutableLiveData<SessionsHistoryResponse?> = apiController.sessionHistoryResponseMutableLiveData
     val sesionListData: MutableLiveData<SessionResponse?> = apiController.sessionResponseMutableLiveData

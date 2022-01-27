@@ -5,9 +5,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
@@ -45,31 +47,7 @@ class HomeFragment : Fragment() {
             HomeViewModelFactory(ApiController(), requireActivity().application)
         )[HomeViewModel::class.java]
 
-        binding.fabAddSession.setOnClickListener{
-            homeViewModel.logout()
-        }
-
-        homeViewModel.userData.observe(viewLifecycleOwner, Observer {
-            if (it != null){
-                homeViewModel.getUserById(
-                    homeViewModel.getLoggedUserUid()
-                )
-            }
-        })
-
-        homeViewModel.userLoggedData.observe(viewLifecycleOwner, Observer {
-            if (it != null){
-                homeViewModel.getSessionList()
-
-                if (UserProfile.isProductOwner()){
-                    //Retirar boton de aniadir sesion para dt y sm
-                    binding.fabAddSession.visibility = View.VISIBLE
-                }
-
-                //Tras cargar data del usuario, quitar progress bar
-                binding.progressBar.visibility = View.GONE
-            }
-        })
+        homeViewModel.getSessionList()
 
         //Cargar Recycler para Users
         homeViewModel.historySessionListData.observe(viewLifecycleOwner, Observer {
@@ -106,8 +84,4 @@ class HomeFragment : Fragment() {
         return binding.root
     }
 
-    override fun onDetach() {
-        super.onDetach()
-        homeViewModel.logout()
-    }
 }

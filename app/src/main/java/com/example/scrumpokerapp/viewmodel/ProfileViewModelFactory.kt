@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.scrumpokerapp.controller.ApiController
 
-class CreateSessionViewModelFactory (
-    private val apiController: ApiController,
+class ProfileViewModelFactory(
     private val application: Application
-) : ViewModelProvider.NewInstanceFactory(){
+) :
+    ViewModelProvider.NewInstanceFactory() {
+
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return CreateSessionViewModel(apiController,application) as T
+        return ProfileViewModel(application) as T
     }
+
 }
