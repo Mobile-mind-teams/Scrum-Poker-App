@@ -1,6 +1,5 @@
 package com.example.scrumpokerapp.model
 
-import com.example.scrumpokerapp.persistance.UserProfile
 import com.google.gson.annotations.SerializedName
 
 class User {
@@ -22,6 +21,9 @@ class User {
     @SerializedName("doc_id")
     var doc_id: String? = null
 
+    @SerializedName("status")
+    var status: String? = null
+
     constructor()
 
     constructor(
@@ -30,7 +32,8 @@ class User {
         uid: String?,
         role: Int?,
         user_name: String?,
-        doc_id: String?
+        doc_id: String?,
+        status: String?
     ) {
         this.email = email
         this.password = password
@@ -38,6 +41,7 @@ class User {
         this.role = role
         this.user_name = user_name
         this.doc_id = doc_id
+        this.status = status
     }
 
     constructor(email: String?, password: String?, uid: String?) {
@@ -58,7 +62,8 @@ class User {
                 "uid: ${uid},\n" +
                 "role: ${role},\n" +
                 "user_name: ${user_name},\n" +
-                "doc_id: ${doc_id}," +
+                "doc_id: ${doc_id},\n" +
+                "status: ${status}," +
                 "\n}"
     }
 }

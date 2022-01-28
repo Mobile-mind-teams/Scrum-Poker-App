@@ -1,6 +1,7 @@
 package com.example.scrumpokerapp.service
 
 import com.example.scrumpokerapp.model.Session
+import com.example.scrumpokerapp.model.User
 import com.example.scrumpokerapp.service.request.UsersRegisterRequest
 import com.example.scrumpokerapp.service.response.*
 import retrofit2.Call
@@ -11,7 +12,7 @@ import retrofit2.http.Path
 
 interface ApiService {
     @POST("users/add")
-    fun postUsers(@Body usersRegisterRequest: UsersRegisterRequest): Call<UsersResponse>
+    fun postUsers(@Body user: User): Call<UsersResponse>
 
     @GET("users/{id}")
     fun getUserById(@Path("id") uid: String): Call<UsersResponse>

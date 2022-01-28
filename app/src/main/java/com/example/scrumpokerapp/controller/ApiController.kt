@@ -3,9 +3,9 @@ package com.example.scrumpokerapp.controller
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.scrumpokerapp.model.Session
+import com.example.scrumpokerapp.model.User
 import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.service.ApiClient
-import com.example.scrumpokerapp.service.request.UsersRegisterRequest
 import com.example.scrumpokerapp.service.response.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -39,7 +39,8 @@ class ApiController {
                         response.body()?.data?.get(0)?.uid.toString(),
                         response.body()?.data?.get(0)?.role.toString().toInt(),
                         response.body()?.data?.get(0)?.user_name.toString(),
-                        response.body()?.data?.get(0)?.doc_id.toString()
+                        response.body()?.data?.get(0)?.doc_id.toString(),
+                        response.body()?.data?.get(0)?.status.toString()
                     )
 
                 } else {
@@ -56,7 +57,7 @@ class ApiController {
         })
     }
 
-    fun postUsersApi(usersRegisterRequest: UsersRegisterRequest) {
+    fun postUsersApi(usersRegisterRequest: User) {
         service.postUsers(usersRegisterRequest).enqueue(object : Callback<UsersResponse>{
 
             override fun onResponse(call: Call<UsersResponse>, response: Response<UsersResponse>) {

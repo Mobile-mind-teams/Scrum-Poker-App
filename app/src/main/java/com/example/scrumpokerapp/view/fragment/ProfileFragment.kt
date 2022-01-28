@@ -55,6 +55,8 @@ class ProfileFragment : Fragment() {
 
         binding.etUserName.setText(UserProfile.user_name)
 
+        binding.etStatus.setText(UserProfile.status)
+
         binding.btnLogOut.setOnClickListener {
             profileViewModel.logOut()
         }

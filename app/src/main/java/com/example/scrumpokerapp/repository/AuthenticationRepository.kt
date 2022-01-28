@@ -5,6 +5,7 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
+import com.example.scrumpokerapp.model.User
 import com.example.scrumpokerapp.service.request.UsersRegisterRequest
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -28,11 +29,10 @@ class AuthenticationRepository {
         }
     }
 
-    fun register(usersRegisterRequest: UsersRegisterRequest){
-        mAuth.createUserWithEmailAndPassword(usersRegisterRequest.email, usersRegisterRequest.password)
+    fun register(usersRegisterRequest: User){
+        mAuth.createUserWithEmailAndPassword(usersRegisterRequest.email.toString(), usersRegisterRequest.password.toString())
             .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                usersRegisterRequest.uid = mAuth.currentUser?.uid!!.toString()
                 firebaseMutableLiveData.postValue(mAuth.currentUser)
                 Toast.makeText(application,"Bienvenido!", Toast.LENGTH_SHORT).show()
             } else {

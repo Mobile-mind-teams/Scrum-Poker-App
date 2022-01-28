@@ -15,6 +15,7 @@ import androidx.navigation.findNavController
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentSignUpBinding
+import com.example.scrumpokerapp.model.User
 import com.example.scrumpokerapp.service.request.UsersRegisterRequest
 import com.example.scrumpokerapp.viewmodel.SignUpViewModel
 import com.example.scrumpokerapp.viewmodel.SignUpViewModelFactory
@@ -57,12 +58,14 @@ class SignUpFragment : Fragment() {
 
         binding.btnSignUp.setOnClickListener {
 
-            val user = UsersRegisterRequest(
+            val user = User(
                 binding.etEmail.text.toString(),
                 binding.etPassword.text.toString(),
-                binding.spRole.selectedItemPosition,
                 "",
-                binding.etUserName.text.toString()
+                binding.spRole.selectedItemPosition,
+                binding.etUserName.text.toString(),
+                "",
+                "available"
             )
 
             sigUpViewModel.register(user)
