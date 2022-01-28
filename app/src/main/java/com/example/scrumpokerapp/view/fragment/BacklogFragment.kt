@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentBacklogBinding
-import com.example.scrumpokerapp.model.Backlog
 import com.example.scrumpokerapp.view.adapter.BacklogAdapter
+import com.example.scrumpokerapp.view.adapter.BacklogStoryAdapter
 import com.example.scrumpokerapp.view.listener.CustomItemListener
 import com.example.scrumpokerapp.viewmodel.BacklogViewModel
 import com.example.scrumpokerapp.viewmodel.BacklogViewModelFactory
@@ -21,7 +21,6 @@ import com.example.scrumpokerapp.viewmodel.BacklogViewModelFactory
 class BacklogFragment : Fragment(), CustomItemListener {
 
     private lateinit var backlogViewModel: BacklogViewModel
-    private lateinit var backlogList: ArrayList<Backlog>
 
     companion object {
         fun newInstance() : Fragment {
@@ -41,36 +40,41 @@ class BacklogFragment : Fragment(), CustomItemListener {
             false
         )
 
-        backlogList = arrayListOf()
-
         backlogViewModel = ViewModelProviders.of(
             this,
             BacklogViewModelFactory(ApiController())
         )[BacklogViewModel::class.java]
 
+        //Carga inicial de fragment
         backlogViewModel.getBacklogList()
 
         //Cargar Recycler
         backlogViewModel.backlogListData.observe(viewLifecycleOwner, Observer {
             if (it != null){
-
-                it.data.forEach {
-                    var backlogItem = Backlog(it.project_name.toString(), it.project_id.toString(), it.status.toString(), it.doc_id.toString())
-                    backlogList.add(backlogItem)
-                }
-
                 binding.backlogRecycler.apply {
                     layoutManager = LinearLayoutManager(context)
-                    adapter = BacklogAdapter(backlogList,this@BacklogFragment)
+                    adapter = BacklogAdapter(it.data,this@BacklogFragment)
                 }
             }
         })
 
         backlogViewModel.selectedItemDocId.observe(viewLifecycleOwner, Observer {
             if(it != null){
-                val bundle = Bundle()
-                bundle.putString("doc_id",backlogViewModel.selectedItemDocId.toString())
-//                binding.root.findNavController().navigate(R.id., bundle)
+                val doc_id = backlogViewModel.selectedItemDocId.value.toString()
+                val collection = "backlog-story"
+                binding.backlogRecycler.visibility = View.GONE
+
+                backlogViewModel.loadStoryList(collection, doc_id)
+            }
+        })
+
+        backlogViewModel.backlogStoryListData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                binding.storyRecycler.visibility = View.VISIBLE
+                binding.storyRecycler.apply {
+                    layoutManager = LinearLayoutManager(context)
+                    adapter = BacklogStoryAdapter(it.data)
+                }
             }
         })
 

@@ -9,7 +9,7 @@ import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.model.Backlog
 import com.example.scrumpokerapp.view.listener.CustomItemListener
 
-class BacklogAdapter(val backlogList: ArrayList<Backlog>, val listener: CustomItemListener? = null) : RecyclerView.Adapter<BacklogAdapter.BacklogViewHolder>() {
+class BacklogAdapter(val backlogList: List<Backlog>, val listener: CustomItemListener? = null) : RecyclerView.Adapter<BacklogAdapter.BacklogViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BacklogViewHolder {
         return BacklogViewHolder(

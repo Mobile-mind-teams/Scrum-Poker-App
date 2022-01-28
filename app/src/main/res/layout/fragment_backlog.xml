@@ -18,6 +18,14 @@
             android:orientation="vertical"
             tools:listitem="@layout/backlog_list_item" />
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:visibility="gone"
+            android:id="@+id/storyRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            tools:listitem="@layout/story_list_item" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>
