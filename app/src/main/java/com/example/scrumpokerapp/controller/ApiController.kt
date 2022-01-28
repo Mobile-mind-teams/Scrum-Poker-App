@@ -6,6 +6,7 @@ import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.service.ApiClient
 import com.example.scrumpokerapp.service.request.UsersRegisterRequest
+import com.example.scrumpokerapp.service.response.BacklogResponse
 import com.example.scrumpokerapp.service.response.SessionResponse
 import com.example.scrumpokerapp.service.response.SessionsHistoryResponse
 import com.example.scrumpokerapp.service.response.UsersResponse
@@ -14,6 +15,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class ApiController {
+    val backlogResponseMutableLiveData: MutableLiveData<BacklogResponse?>
     val service = ApiClient().initRetrofit()
     val userResponseMutableLiveData : MutableLiveData<UsersResponse?>
     val sessionHistoryResponseMutableLiveData : MutableLiveData<SessionsHistoryResponse?>
@@ -23,6 +25,7 @@ class ApiController {
         userResponseMutableLiveData = MutableLiveData()
         sessionHistoryResponseMutableLiveData = MutableLiveData()
         sessionResponseMutableLiveData = MutableLiveData()
+        backlogResponseMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -158,4 +161,28 @@ class ApiController {
             }
         })
     }
+
+    fun getAllBacklogs() {
+        service.getAllBacklogs().enqueue(object : Callback<BacklogResponse>{
+            override fun onResponse(
+                call: Call<BacklogResponse>,
+                response: Response<BacklogResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                backlogResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<BacklogResponse>, t: Throwable) {
+                backlogResponseMutableLiveData.postValue(null)
+                Log.i("Backlog Data: ","GET: " + 500 + " " + t.stackTraceToString())
+            }
+        })
+    }
+
+
 }

@@ -30,5 +30,10 @@
         android:name="com.example.scrumpokerapp.view.activity.MainActivity"
         android:label="MainActivity"
         tools:layout="@layout/fragment_home"/>
+    <fragment
+        android:id="@+id/backlogFragment"
+        android:name="com.example.scrumpokerapp.view.fragment.BacklogFragment"
+        android:label="BacklogFragment"
+        tools:layout="@layout/fragment_backlog"/>
 
 </navigation>

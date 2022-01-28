@@ -1,21 +1,18 @@
 package com.example.scrumpokerapp.view.fragment
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentHomeBinding
 import com.example.scrumpokerapp.model.Session
-import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.view.adapter.SessionAdapter
 import com.example.scrumpokerapp.viewmodel.HomeViewModel
 import com.example.scrumpokerapp.viewmodel.HomeViewModelFactory

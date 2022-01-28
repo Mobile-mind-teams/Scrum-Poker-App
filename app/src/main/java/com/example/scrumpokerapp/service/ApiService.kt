@@ -2,6 +2,7 @@ package com.example.scrumpokerapp.service
 
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.service.request.UsersRegisterRequest
+import com.example.scrumpokerapp.service.response.BacklogResponse
 import com.example.scrumpokerapp.service.response.SessionResponse
 import com.example.scrumpokerapp.service.response.SessionsHistoryResponse
 import com.example.scrumpokerapp.service.response.UsersResponse
@@ -29,4 +30,7 @@ interface ApiService {
 
     @GET("sessions/add")
     fun createSession(@Body session: Session): Call<SessionResponse>
+
+    @GET("backlogs/all")
+    fun getAllBacklogs(): Call<BacklogResponse>
 }

@@ -95,7 +95,7 @@
 
                 <TextView
                     android:layout_marginLeft="5dp"
-                    android:id="@+id/session_id"
+                    android:id="@+id/status"
                     android:textColor="@color/black"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
