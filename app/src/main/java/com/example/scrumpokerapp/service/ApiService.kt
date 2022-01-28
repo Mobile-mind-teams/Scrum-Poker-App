@@ -23,6 +23,9 @@ interface ApiService {
     @GET("sessions/all")
     fun getAllSessions(): Call<SessionResponse>
 
+    @GET("sessions/all/{id}")
+    fun getAllSessionsByPOID(@Path("id") po_id: String): Call<SessionResponse>
+
     @GET("users/all")
     fun getAllUsers(): Call<UsersResponse>
 

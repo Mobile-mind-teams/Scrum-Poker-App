@@ -39,13 +39,15 @@ class HomeViewModel (
         apiController.getAllUserSessions(uid)
     }
 
-    fun getAllSessions(){
-        apiController.getAllSessions()
+    fun getAllSessions(po_id: String){
+        apiController.getAllSessions(po_id)
     }
 
     fun getSessionList(){
         if (UserProfile.isProductOwner()){
-            getAllSessions()
+            getAllSessions(
+                UserProfile.uid.toString()
+            )
         } else {
             getAllUserSessions(
                 UserProfile.uid.toString()

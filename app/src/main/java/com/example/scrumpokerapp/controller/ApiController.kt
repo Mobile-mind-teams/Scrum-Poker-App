@@ -99,8 +99,8 @@ class ApiController {
         })
     }
 
-    fun getAllSessions(){
-        service.getAllSessions().enqueue(object : Callback<SessionResponse> {
+    fun getAllSessions(po_id: String){
+        service.getAllSessionsByPOID(po_id).enqueue(object : Callback<SessionResponse> {
             override fun onResponse(
                 call: Call<SessionResponse>,
                 response: Response<SessionResponse>
