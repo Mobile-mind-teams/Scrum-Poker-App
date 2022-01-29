@@ -11,15 +11,75 @@
         android:layout_height="match_parent"
         tools:context=".view.fragment.CreateSessionFragment">
 
-        <TextView
-            android:id="@+id/sessionParams"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Contenido bundle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:weightSum="3">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.25"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_marginLeft="5dp"
+                    android:textColor="@color/black"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Proyectos"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/projectsRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    tools:listitem="@layout/project_list_item" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.25"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_marginLeft="5dp"
+                    android:textColor="@color/black"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Usuarios"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/usersRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    tools:listitem="@layout/user_list_item" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight=".5"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnCreateSession"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="24dp"
+                    android:layout_marginTop="12dp"
+                    android:text="Crear Session"
+                    android:textColor="@color/colorAccent"
+                    android:background="@color/colorPrimary" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

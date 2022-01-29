@@ -2,6 +2,8 @@ package com.example.scrumpokerapp.controller
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import com.example.scrumpokerapp.model.Email
+import com.example.scrumpokerapp.model.Project
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.model.User
 import com.example.scrumpokerapp.persistance.UserProfile
@@ -18,6 +20,8 @@ class ApiController {
     val sessionHistoryResponseMutableLiveData : MutableLiveData<SessionsHistoryResponse?>
     val sessionResponseMutableLiveData : MutableLiveData<SessionResponse?>
     val backlogStoriesResponseMutableLiveData : MutableLiveData<BacklogStoryResponse?>
+    val projectResponseMutableLiveData : MutableLiveData<ProjectResponse?>
+    val emailResponseMutableLiveData : MutableLiveData<EmailResponse?>
 
     constructor(){
         userResponseMutableLiveData = MutableLiveData()
@@ -25,6 +29,8 @@ class ApiController {
         sessionResponseMutableLiveData = MutableLiveData()
         backlogResponseMutableLiveData = MutableLiveData()
         backlogStoriesResponseMutableLiveData = MutableLiveData()
+        projectResponseMutableLiveData = MutableLiveData()
+        emailResponseMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -140,6 +146,47 @@ class ApiController {
         })
     }
 
+    fun getAllAvailableUsers(){
+        service.getAllAvailableUsers().enqueue(object : Callback<UsersResponse>{
+            override fun onResponse(call: Call<UsersResponse>, response: Response<UsersResponse>) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                userResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<UsersResponse>, t: Throwable) {
+                userResponseMutableLiveData.postValue(null)
+                Log.i("User Data: ","GET: " + 500 + " " + t.stackTraceToString())
+            }
+        })
+    }
+
+    fun getAllUnassignedProjects(){
+        service.getAllUnassignedProjects().enqueue(object : Callback<ProjectResponse>{
+            override fun onResponse(
+                call: Call<ProjectResponse>,
+                response: Response<ProjectResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                projectResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<ProjectResponse>, t: Throwable) {
+                projectResponseMutableLiveData.postValue(null)
+                Log.i("Project Data: ","GET: " + 500 + " " + t.stackTraceToString())
+            }
+        })
+    }
+
     fun createNewSession(session: Session){
         service.createSession(session).enqueue(object : Callback<SessionResponse>{
             override fun onResponse(
@@ -203,6 +250,67 @@ class ApiController {
             override fun onFailure(call: Call<BacklogStoryResponse>, t: Throwable) {
                 backlogStoriesResponseMutableLiveData.postValue(null)
                 Log.i("Backlog Story Data: ","GET: " + 500 + " " + t.stackTraceToString())
+            }
+        })
+    }
+
+    fun sendEmailApi(email: Email) {
+        service.sendEmail(email).enqueue(object : Callback<EmailResponse>{
+
+            override fun onResponse(call: Call<EmailResponse>, response: Response<EmailResponse>) {
+                if (response.isSuccessful){
+                    Log.i("Email Data POST: "," ${response.body()?.message} " + 200 )
+                } else {
+                    Log.i("Email Data POST: ", "${response.body()?.message} " + 200)
+                }
+
+                emailResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<EmailResponse>, t: Throwable) {
+                emailResponseMutableLiveData.postValue(null)
+                Log.i("Email Data: ","POST: " + 500 + " " + t.stackTrace.toString())
+            }
+        })
+    }
+
+    fun updateUser(user: User, uid: String){
+        service.updateUser(user, uid).enqueue(object : Callback<UsersResponse>{
+            override fun onResponse(call: Call<UsersResponse>, response: Response<UsersResponse>) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                userResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<UsersResponse>, t: Throwable) {
+                userResponseMutableLiveData.postValue(null)
+                Log.i("User Data: ","POST: " + 500 + " " + t.stackTrace.toString())
+            }
+        })
+    }
+
+    fun updateProject(project: Project, project_id : String){
+        service.updateProject(project, project_id).enqueue(object : Callback<ProjectResponse>{
+            override fun onResponse(
+                call: Call<ProjectResponse>,
+                response: Response<ProjectResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                projectResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<ProjectResponse>, t: Throwable) {
+                projectResponseMutableLiveData.postValue(null)
+                Log.i("Project Data: ","POST: " + 500 + " " + t.stackTrace.toString())
             }
         })
     }

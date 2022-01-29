@@ -1,14 +1,12 @@
 package com.example.scrumpokerapp.service
 
+import com.example.scrumpokerapp.model.Email
+import com.example.scrumpokerapp.model.Project
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.model.User
-import com.example.scrumpokerapp.service.request.UsersRegisterRequest
 import com.example.scrumpokerapp.service.response.*
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface ApiService {
     @POST("users/add")
@@ -37,4 +35,20 @@ interface ApiService {
 
     @GET("stories/backlog/all/{id}")
     fun getAllStoriesFromBacklog(@Path("id") doc_id: String): Call<BacklogStoryResponse>
+
+    @GET("users/all/available")
+    fun getAllAvailableUsers(): Call<UsersResponse>
+
+    @GET("projects/all/unassigned")
+    fun getAllUnassignedProjects(): Call<ProjectResponse>
+
+    @POST("email/send")
+    fun sendEmail(@Body email: Email): Call<EmailResponse>
+
+    @PATCH("projects/update/{id}")
+    fun updateProject(@Body project: Project, @Path("id") project_id : String) : Call<ProjectResponse>
+
+    @PATCH("users/update/{id}")
+    fun updateUser(@Body user: User, @Path("id") uid : String) : Call<UsersResponse>
+
 }

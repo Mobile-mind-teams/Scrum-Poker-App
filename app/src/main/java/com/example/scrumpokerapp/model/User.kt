@@ -63,7 +63,7 @@ class User {
                 "role: ${role},\n" +
                 "user_name: ${user_name},\n" +
                 "doc_id: ${doc_id},\n" +
-                "status: ${status}," +
+                "status: ${status},\n" +
                 "\n}"
     }
 }
