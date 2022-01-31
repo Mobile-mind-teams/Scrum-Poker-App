@@ -44,7 +44,7 @@ class ProjectAdapter(val list: List<Project>, val listener: CustomItemListener? 
             lastSelected = position
             notifyItemChanged(lastSelected)
 
-            listener?.getSelectedItemDocId(list[position].project_id.toString())
+            listener?.getSelectedItemDocId(list[position].name.toString())
         }
     }
 

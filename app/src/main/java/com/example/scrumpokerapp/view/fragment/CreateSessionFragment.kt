@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentCreateSessionBinding
+import com.example.scrumpokerapp.model.Email
 import com.example.scrumpokerapp.view.adapter.ProjectAdapter
 import com.example.scrumpokerapp.view.adapter.UserAdapter
 import com.example.scrumpokerapp.view.listener.CustomItemListener
@@ -69,15 +71,30 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomItemListe
             }
         })
 
+        createSessionViewModel.emailMutableLiveData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                Toast.makeText(context,"Invitacion Enviada!", Toast.LENGTH_SHORT).show()
+                Log.i("Email Response: ","RAW: " + 200 + " " + it.toText())
+            } else {
+                Toast.makeText(context,"Invitacion No Enviada...", Toast.LENGTH_SHORT).show()
+            }
+
+            binding.progressBar.visibility = View.INVISIBLE
+        })
+
         binding.btnCreateSession.setOnClickListener {
-            Log.i("Email: ","RAW: " + 200 + " " + createSessionViewModel.emailUserListToString() + " " + createSessionViewModel.projectId.toString())
+            binding.progressBar.visibility = View.VISIBLE
+            createSessionViewModel.sendEmail(
+                Email(createSessionViewModel.projectName,createSessionViewModel.emailUserListToString())
+            )
+            Toast.makeText(context,"Enviando Invitacion...", Toast.LENGTH_SHORT).show()
         }
 
         return binding.root
     }
 
-    override fun getSelectedItemDocId(doc_id: String) {
-        createSessionViewModel.projectId = doc_id
+    override fun getSelectedItemDocId(name: String) {
+        createSessionViewModel.projectName = name
     }
 
     override fun getSelectedItemEmail(email: String) {

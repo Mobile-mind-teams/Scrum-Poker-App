@@ -1,10 +1,11 @@
 package com.example.scrumpokerapp.viewmodel
 
-import android.app.Application
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.scrumpokerapp.controller.ApiController
-import com.example.scrumpokerapp.model.User
+import com.example.scrumpokerapp.model.Email
+import com.example.scrumpokerapp.service.response.EmailResponse
 import com.example.scrumpokerapp.service.response.ProjectResponse
 import com.example.scrumpokerapp.service.response.UsersResponse
 
@@ -13,8 +14,9 @@ class CreateSessionViewModel(
 ) : ViewModel() {
     val userListMutableLiveData : MutableLiveData<UsersResponse?> = apiController.userResponseMutableLiveData
     val projectListMutableLiveData : MutableLiveData<ProjectResponse?> = apiController.projectResponseMutableLiveData
+    val emailMutableLiveData : MutableLiveData<EmailResponse?> = apiController.emailResponseMutableLiveData
 
-    var projectId : String? = null
+    var projectName : String = ""
     var emailAddresseUserList : String = ""
     var emailUserList : ArrayList<String> = arrayListOf()
 
@@ -28,10 +30,19 @@ class CreateSessionViewModel(
 
     fun emailUserListToString() : String{
         emailAddresseUserList = ""
-        for (email : String in emailUserList){
-            emailAddresseUserList = email + ";" + emailAddresseUserList
+
+        if (emailUserList.size == 1) {
+            return emailUserList.get(0)
+        } else {
+            for (email : String in emailUserList){
+                emailAddresseUserList = email + ";" + emailAddresseUserList
+            }
         }
 
         return emailAddresseUserList
+    }
+
+    fun sendEmail(email: Email){
+        apiController.sendEmailApi(email)
     }
 }

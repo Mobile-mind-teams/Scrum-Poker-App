@@ -259,9 +259,9 @@ class ApiController {
 
             override fun onResponse(call: Call<EmailResponse>, response: Response<EmailResponse>) {
                 if (response.isSuccessful){
-                    Log.i("Email Data POST: "," ${response.body()?.message} " + 200 )
+                    Log.i("Email Data POST: "," ${response.body()?.message} " + 200 + " " + response.body()?.message)
                 } else {
-                    Log.i("Email Data POST: ", "${response.body()?.message} " + 200)
+                    Log.i("Email Data POST: ", "${response.body()?.message} " + 200 + "Api Error!")
                 }
 
                 emailResponseMutableLiveData.postValue(response.body())

@@ -3,25 +3,22 @@ package com.example.scrumpokerapp.model
 import com.google.gson.annotations.SerializedName
 
 class Email {
-    var project_name : String? = null
-    var session_id : String? = null
-    @SerializedName("from") var from : String = "charliebarttlet@icloud.com"
+    @SerializedName("from") val from : String = "charliebarttlet@icloud.com"
     @SerializedName("to") var to : String? = null
-    @SerializedName("subject") var subject :
-            String = "Sesion de Scrum Poker ${session_id}"
-    @SerializedName("html") var html :
-            String = "Saludos, <br><br>" +
-            " Has sido elegid@ para participar en la asignacion de tiempos" +
-            " para el proyecto ${project_name}. <br><br> " +
-            "La reunion esta por empezar, <br><br> " +
-            "Puedes ir a la app pulsando <a href=\\\"https://www.scrum-poker.com/open\\\"> aqui. </a>\""
+    @SerializedName("subject") var subject : String = ""
+    @SerializedName("html") var html : String = ""
 
     constructor(){}
 
-    constructor(project_name: String, session_id: String, to: String){
-        this.project_name = project_name
-        this.session_id = session_id
+    constructor(project_name: String, to: String){
+        this.subject = "Sesion de Scrum Poker ${project_name}"
         this.to = to
+        this.html = "Saludos, <br><br>" +
+                " Has sido elegid@ para participar en la asignacion de tiempos por historia" +
+                " para el proyecto <strong>${project_name}</strong>. <br><br> " +
+                "La reunion esta por empezar, <br><br> " +
+                "Puedes ir a la app seleccionando el enlace y pulsando abrir <br><br> " +
+                "<strong>https://www.scrum-poker.com/open</strong>"
     }
 
     override fun toString(): String {
