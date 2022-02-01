@@ -1,44 +1,63 @@
 package com.example.scrumpokerapp.view.activity
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.core.view.get
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import androidx.navigation.findNavController
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.example.scrumpokerapp.R
+import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.ActivityMainBinding
 import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.view.fragment.*
+import com.example.scrumpokerapp.viewmodel.MainActivityViewModel
+import com.example.scrumpokerapp.viewmodel.MainActivityViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
+    lateinit var mainActivityViewModel : MainActivityViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val isProductOwner : Boolean = intent.getBooleanExtra("role", false)
 
         val binding : ActivityMainBinding = DataBindingUtil.setContentView(
             this,
             R.layout.activity_main
         )
 
-        if(isProductOwner){
-            binding.bottomNavigationMenu.menu.getItem(3).setVisible(true)
-        }
+        mainActivityViewModel = ViewModelProviders.of(
+            this,
+            MainActivityViewModelFactory()
+        )[MainActivityViewModel::class.java]
 
-        replaceFragment(HomeFragment.newInstance())
+        initActivity()
+
+        mainActivityViewModel.showBottomNavigationMenu.observe(this, Observer{
+            if (it!=null){
+                if (it){
+                    binding.bottomNavigationMenu.visibility = View.VISIBLE
+
+                    if (UserProfile.isProductOwner() && UserProfile.isAvailable()){
+                        binding.bottomNavigationMenu.menu.getItem(3).isVisible = true
+                    }
+                } else {
+                    binding.bottomNavigationMenu.visibility = View.GONE
+                }
+            }
+        })
 
         binding.bottomNavigationMenu.setOnItemSelectedListener {
             when(it.itemId){
-                R.id.home -> replaceFragment(HomeFragment.newInstance())
-                R.id.profile -> replaceFragment(ProfileFragment.newInstance())
-                R.id.backlog -> replaceFragment(BacklogFragment.newInstance())
-                R.id.create_session -> replaceFragment(CreateSessionFragment.newInstance())
+                R.id.home -> replaceFragment(HomeFragment.newInstance(), "HomeFragment")
+                R.id.profile -> replaceFragment(ProfileFragment.newInstance(), "ProfileFragment")
+                R.id.backlog -> replaceFragment(BacklogFragment.newInstance(), "BacklogFragment")
+                R.id.create_session -> replaceFragment(CreateSessionFragment.newInstance(), "CreateSessionFragment")
                 else -> Toast.makeText(application, "Error!", Toast.LENGTH_SHORT).show()
             }
 
@@ -46,10 +65,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun replaceFragment(newInstance: Fragment) {
+    private fun initActivity() {
+        mainActivityViewModel.loggedStatus.postValue(false)
+
+        replaceFragment(LogInFragment.newInstance(), "LogInFragment")
+    }
+
+    fun replaceFragment(newInstance: Fragment, tag: String) {
         val manager : FragmentManager = supportFragmentManager
         val fragment_transaction : FragmentTransaction = manager.beginTransaction()
-        fragment_transaction.replace(R.id.frame_layout, newInstance)
+        fragment_transaction.replace(R.id.frame_layout, newInstance, tag)
         fragment_transaction.commit()
+    }
+
+    override fun onBackPressed() {
+        if(!mainActivityViewModel.loggedStatus.value!!.equals(true)){
+            mainActivityViewModel.showBottomNavigationMenu.postValue(false)
+            replaceFragment(LogInFragment.newInstance(), "LogInFragment")
+        }
     }
 }
