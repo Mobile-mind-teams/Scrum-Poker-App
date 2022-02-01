@@ -17,6 +17,7 @@ import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentLogInBinding
 import com.example.scrumpokerapp.model.User
 import com.example.scrumpokerapp.persistance.UserProfile
+import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.viewmodel.*
 
 class LogInFragment : Fragment() {
@@ -51,8 +52,9 @@ class LogInFragment : Fragment() {
                 binding.etEmail.text.toString(),
                 binding.etPassword.text.toString()
             )
-
         }
+
+        (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(false)
 
         logInViewModel.userData.observe(viewLifecycleOwner, Observer {
             if (it != null){
@@ -64,14 +66,14 @@ class LogInFragment : Fragment() {
 
         logInViewModel.userLoggedData.observe(viewLifecycleOwner, Observer {
             if(it != null){
-                val bundle : Bundle = Bundle()
-                bundle.putBoolean("role", UserProfile.isProductOwner())
-                binding.root.findNavController().navigate(R.id.action_logInFragment_to_mainActivity, bundle)
+                (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(true)
+                (activity as? MainActivity)?.mainActivityViewModel?.loggedStatus?.postValue(true)
+                (activity as? MainActivity)?.replaceFragment(HomeFragment.newInstance(), "HomeFragment")
             }
         })
 
         binding.tvSignUp.setOnClickListener{
-            binding.root.findNavController().navigate(R.id.action_logInFragment_to_signUpFragment2)
+            (activity as? MainActivity)?.replaceFragment(SignUpFragment.newInstance(), "SignUpFragment")
         }
 
         return binding.root

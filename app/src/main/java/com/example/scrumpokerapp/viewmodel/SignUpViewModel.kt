@@ -12,12 +12,13 @@ class SignUpViewModel(val apiController: ApiController, val application: Applica
 
     val authenticationRepository: AuthenticationRepository = AuthenticationRepository(application)
     val userData: MutableLiveData<FirebaseUser> = authenticationRepository.firebaseMutableLiveData
+    val userRegisterStatus: MutableLiveData<Boolean> = apiController.userRegisterResponseMutableLiveData
 
     fun register(usersRegisterRequest: User) {
         authenticationRepository.register(usersRegisterRequest)
     }
 
-    fun postUser(usersRegisterRequest: User){
+    fun postUserToDataBase(usersRegisterRequest: User){
         usersRegisterRequest.uid = userData.value!!.uid
         apiController.postUsersApi(usersRegisterRequest)
     }
