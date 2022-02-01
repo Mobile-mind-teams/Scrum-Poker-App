@@ -12,13 +12,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentBacklogBinding
+import com.example.scrumpokerapp.model.BacklogStory
+import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.view.adapter.BacklogAdapter
 import com.example.scrumpokerapp.view.adapter.BacklogStoryAdapter
 import com.example.scrumpokerapp.view.listener.CustomItemListener
+import com.example.scrumpokerapp.view.listener.CustomStoryItemListener
 import com.example.scrumpokerapp.viewmodel.BacklogViewModel
 import com.example.scrumpokerapp.viewmodel.BacklogViewModelFactory
 
-class BacklogFragment : Fragment(), CustomItemListener {
+class BacklogFragment : Fragment(), CustomItemListener, CustomStoryItemListener {
 
     private lateinit var backlogViewModel: BacklogViewModel
 
@@ -51,6 +54,8 @@ class BacklogFragment : Fragment(), CustomItemListener {
         //Cargar Recycler
         backlogViewModel.backlogListData.observe(viewLifecycleOwner, Observer {
             if (it != null){
+                binding.storyRecycler.visibility = View.GONE
+
                 binding.backlogRecycler.apply {
                     layoutManager = LinearLayoutManager(context)
                     adapter = BacklogAdapter(it.data,this@BacklogFragment)
@@ -73,7 +78,7 @@ class BacklogFragment : Fragment(), CustomItemListener {
                 binding.storyRecycler.visibility = View.VISIBLE
                 binding.storyRecycler.apply {
                     layoutManager = LinearLayoutManager(context)
-                    adapter = BacklogStoryAdapter(it.data)
+                    adapter = BacklogStoryAdapter(it.data, this@BacklogFragment)
                 }
             }
         })
@@ -84,5 +89,9 @@ class BacklogFragment : Fragment(), CustomItemListener {
 
     override fun getSelectedItemDocId(doc_id: String){
         backlogViewModel.selectedItemDocId.postValue(doc_id)
+    }
+
+    override fun getSelectedItem(story: BacklogStory) {
+        (activity as? MainActivity)?.replaceFragment(BacklogFragment.newInstance(), "BacklogFragment")
     }
 }

@@ -7,8 +7,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.model.BacklogStory
+import com.example.scrumpokerapp.view.listener.CustomStoryItemListener
 
-class BacklogStoryAdapter(val list: List<BacklogStory>) : RecyclerView.Adapter<BacklogStoryAdapter.ViewHolder>() {
+class BacklogStoryAdapter(val list: List<BacklogStory>, val listener: CustomStoryItemListener? = null) : RecyclerView.Adapter<BacklogStoryAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -24,6 +25,10 @@ class BacklogStoryAdapter(val list: List<BacklogStory>) : RecyclerView.Adapter<B
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(list[position])
+
+        holder.itemView.setOnClickListener {
+            listener?.getSelectedItem(list[position])
+        }
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

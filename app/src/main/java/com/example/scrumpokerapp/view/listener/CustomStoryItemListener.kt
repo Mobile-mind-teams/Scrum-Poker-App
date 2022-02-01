@@ -1,4 +1,7 @@
 package com.example.scrumpokerapp.view.listener
 
-class CustomStoryItemListener {
+import com.example.scrumpokerapp.model.BacklogStory
+
+interface CustomStoryItemListener {
+    fun getSelectedItem(story: BacklogStory)
 }
