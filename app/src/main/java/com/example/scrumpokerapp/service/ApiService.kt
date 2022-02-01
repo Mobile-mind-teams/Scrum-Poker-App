@@ -18,6 +18,9 @@ interface ApiService {
     @GET("session-history/users/all/{id}")
     fun getAllUserSessions(@Path("id") uid: String): Call<SessionsHistoryResponse>
 
+    @GET("sessions/team/{email}")
+    fun getAllUserSessionsByEmail(@Path("email") email: String): Call<SessionResponse>
+
     @GET("sessions/all")
     fun getAllSessions(): Call<SessionResponse>
 
@@ -27,8 +30,14 @@ interface ApiService {
     @GET("users/all")
     fun getAllUsers(): Call<UsersResponse>
 
-    @GET("sessions/add")
+    @POST("sessions/add")
     fun createSession(@Body session: Session): Call<SessionResponse>
+
+    @GET("sessions/{id}&{status}")
+    fun getSessionByAdminIDAndStatus(
+        @Path("id") admin_uid: String,
+        @Path("status") status: String
+    ): Call<SessionResponse>
 
     @GET("backlogs/all")
     fun getAllBacklogs(): Call<BacklogResponse>
@@ -49,6 +58,6 @@ interface ApiService {
     fun updateProject(@Body project: Project, @Path("id") project_id : String) : Call<ProjectResponse>
 
     @PATCH("users/update/{id}")
-    fun updateUser(@Body user: User, @Path("id") uid : String) : Call<UsersResponse>
+    fun updateUser(@Body user: User, @Path("id") doc_id : String) : Call<UsersResponse>
 
 }

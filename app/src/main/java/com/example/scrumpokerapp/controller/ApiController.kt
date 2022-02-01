@@ -14,23 +14,35 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class ApiController {
+    val systemStatusMutableLiveData: MutableLiveData<Boolean>
     val backlogResponseMutableLiveData: MutableLiveData<BacklogResponse?>
     val service = ApiClient().initRetrofit()
+    val adminResponseMutableLiveData : MutableLiveData<UsersResponse?>
+    val userRegisterResponseMutableLiveData : MutableLiveData<Boolean>
+    val userUpdateResponseMutableLiveData : MutableLiveData<UsersResponse?>
+    val userListResponseMutableLiveData : MutableLiveData<UsersResponse?>
     val userResponseMutableLiveData : MutableLiveData<UsersResponse?>
-    val sessionHistoryResponseMutableLiveData : MutableLiveData<SessionsHistoryResponse?>
     val sessionResponseMutableLiveData : MutableLiveData<SessionResponse?>
+    val newSessionResponseMutableLiveData : MutableLiveData<SessionResponse?>
     val backlogStoriesResponseMutableLiveData : MutableLiveData<BacklogStoryResponse?>
     val projectResponseMutableLiveData : MutableLiveData<ProjectResponse?>
+    val projectUpdateResponseMutableLiveData : MutableLiveData<ProjectResponse?>
     val emailResponseMutableLiveData : MutableLiveData<EmailResponse?>
 
     constructor(){
         userResponseMutableLiveData = MutableLiveData()
-        sessionHistoryResponseMutableLiveData = MutableLiveData()
+        adminResponseMutableLiveData = MutableLiveData()
         sessionResponseMutableLiveData = MutableLiveData()
+        newSessionResponseMutableLiveData = MutableLiveData()
         backlogResponseMutableLiveData = MutableLiveData()
         backlogStoriesResponseMutableLiveData = MutableLiveData()
         projectResponseMutableLiveData = MutableLiveData()
         emailResponseMutableLiveData = MutableLiveData()
+        systemStatusMutableLiveData = MutableLiveData()
+        projectUpdateResponseMutableLiveData = MutableLiveData()
+        userUpdateResponseMutableLiveData = MutableLiveData()
+        userListResponseMutableLiveData = MutableLiveData()
+        userRegisterResponseMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -73,33 +85,33 @@ class ApiController {
                     Log.i("${response.body()?.collection} Data POST: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }
 
-                userResponseMutableLiveData.postValue(response.body())
+                userRegisterResponseMutableLiveData.postValue(response.isSuccessful)
             }
 
             override fun onFailure(call: Call<UsersResponse>, t: Throwable) {
-                userResponseMutableLiveData.postValue(null)
+                userRegisterResponseMutableLiveData.postValue(false)
                 Log.i("User Data: ","POST: " + 500 + " " + t.stackTrace.toString())
             }
         })
     }
 
-    fun getAllUserSessions(uid: String){
-        service.getAllUserSessions(uid).enqueue(object : Callback<SessionsHistoryResponse> {
+    fun getAllUserSessions(email: String){
+        service.getAllUserSessionsByEmail(email).enqueue(object : Callback<SessionResponse> {
             override fun onResponse(
-                call: Call<SessionsHistoryResponse>,
-                historyResponse: Response<SessionsHistoryResponse>
+                call: Call<SessionResponse>,
+                response: Response<SessionResponse>
             ) {
-                if (historyResponse.isSuccessful && historyResponse.body() != null){
-                    Log.i("${historyResponse.body()?.collection} Data GET: "," ${historyResponse.body()?.message} " + 200 + " " + historyResponse.body()?.data)
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
                 } else {
-                    Log.i("${historyResponse.body()?.collection} Data GET: ", "${historyResponse.body()?.message} " + 200 + " Not Found!")
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }
 
-                sessionHistoryResponseMutableLiveData.postValue(historyResponse.body())
+                sessionResponseMutableLiveData.postValue(response.body())
             }
 
-            override fun onFailure(call: Call<SessionsHistoryResponse>, t: Throwable) {
-                sessionHistoryResponseMutableLiveData.postValue(null)
+            override fun onFailure(call: Call<SessionResponse>, t: Throwable) {
+                sessionResponseMutableLiveData.postValue(null)
                 Log.i("Session Data: ","GET: " + 500 + " " + t.stackTraceToString())
             }
         })
@@ -155,11 +167,11 @@ class ApiController {
                     Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }
 
-                userResponseMutableLiveData.postValue(response.body())
+                userListResponseMutableLiveData.postValue(response.body())
             }
 
             override fun onFailure(call: Call<UsersResponse>, t: Throwable) {
-                userResponseMutableLiveData.postValue(null)
+                userListResponseMutableLiveData.postValue(null)
                 Log.i("User Data: ","GET: " + 500 + " " + t.stackTraceToString())
             }
         })
@@ -268,36 +280,66 @@ class ApiController {
             }
 
             override fun onFailure(call: Call<EmailResponse>, t: Throwable) {
-                emailResponseMutableLiveData.postValue(null)
+                emailResponseMutableLiveData.postValue(EmailResponse())
                 Log.i("Email Data: ","POST: " + 500 + " " + t.stackTrace.toString())
             }
         })
     }
 
-    fun updateUser(user: User, uid: String){
-        service.updateUser(user, uid).enqueue(object : Callback<UsersResponse>{
+    fun updateUser(user: User, doc_id: String, role: Int?){
+        service.updateUser(user, doc_id).enqueue(object : Callback<UsersResponse>{
             override fun onResponse(call: Call<UsersResponse>, response: Response<UsersResponse>) {
                 if (response.isSuccessful && response.body() != null){
-                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                    Log.i("${response.body()?.collection} Data PATCH: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
                 } else {
-                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                    Log.i("${response.body()?.collection} Data PATCH: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }
 
-                userResponseMutableLiveData.postValue(response.body())
+                if (role == UserProfile.role){
+                    adminResponseMutableLiveData.postValue(response.body())
+                } else {
+                    userUpdateResponseMutableLiveData.postValue(response.body())
+                }
             }
 
             override fun onFailure(call: Call<UsersResponse>, t: Throwable) {
-                userResponseMutableLiveData.postValue(null)
-                Log.i("User Data: ","POST: " + 500 + " " + t.stackTrace.toString())
+                if (role == UserProfile.role){
+                    adminResponseMutableLiveData.postValue(null)
+                } else {
+                    userUpdateResponseMutableLiveData.postValue(null)
+                }
+                Log.i("User Data: ","PATCH: " + 500 + " " + t.stackTrace.toString())
             }
         })
     }
 
-    fun updateProject(project: Project, project_id : String){
-        service.updateProject(project, project_id).enqueue(object : Callback<ProjectResponse>{
+    fun updateProject(project: Project){
+        service.updateProject(project, project.project_id.toString()).enqueue(object : Callback<ProjectResponse>{
             override fun onResponse(
                 call: Call<ProjectResponse>,
                 response: Response<ProjectResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data PATCH: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data PATCH: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                projectUpdateResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<ProjectResponse>, t: Throwable) {
+                projectUpdateResponseMutableLiveData.postValue(null)
+                Log.i("Project Data: ","PATCH: " + 500 + " " + t.stackTrace.toString())
+            }
+        })
+    }
+
+    fun getJustCreatedSession(admin_uid : String, status: String){
+        service.getSessionByAdminIDAndStatus(admin_uid, status).enqueue(object : Callback<SessionResponse>{
+            override fun onResponse(
+                call: Call<SessionResponse>,
+                response: Response<SessionResponse>
             ) {
                 if (response.isSuccessful && response.body() != null){
                     Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
@@ -305,12 +347,12 @@ class ApiController {
                     Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }
 
-                projectResponseMutableLiveData.postValue(response.body())
+                newSessionResponseMutableLiveData.postValue(response.body())
             }
 
-            override fun onFailure(call: Call<ProjectResponse>, t: Throwable) {
-                projectResponseMutableLiveData.postValue(null)
-                Log.i("Project Data: ","POST: " + 500 + " " + t.stackTrace.toString())
+            override fun onFailure(call: Call<SessionResponse>, t: Throwable) {
+                newSessionResponseMutableLiveData.postValue(null)
+                Log.i("Session Data: ","GET: " + 500 + " " + t.stackTrace.toString())
             }
         })
     }
