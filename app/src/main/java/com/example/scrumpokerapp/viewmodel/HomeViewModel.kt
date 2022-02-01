@@ -16,24 +16,7 @@ class HomeViewModel (
     val application: Application
     ) : ViewModel() {
 
-    val authenticationRepository: AuthenticationRepository = AuthenticationRepository(application)
-    val userData: MutableLiveData<FirebaseUser> = authenticationRepository.firebaseMutableLiveData
-    val sessionStatus: MutableLiveData<Boolean> = authenticationRepository.logoutStatusMutableLiveData
-    val userLoggedData : MutableLiveData<UsersResponse?> = apiController.userResponseMutableLiveData
-    val historySessionListData : MutableLiveData<SessionsHistoryResponse?> = apiController.sessionHistoryResponseMutableLiveData
     val sesionListData: MutableLiveData<SessionResponse?> = apiController.sessionResponseMutableLiveData
-
-    fun getLoggedUserUid() : String {
-        return userData.value?.uid.toString()
-    }
-
-    fun getUserById(uid: String){
-        apiController.getUserByIdApi(uid)
-    }
-
-    fun logout(){
-        authenticationRepository.logout()
-    }
 
     fun getAllUserSessions(uid: String){
         apiController.getAllUserSessions(uid)
@@ -50,7 +33,7 @@ class HomeViewModel (
             )
         } else {
             getAllUserSessions(
-                UserProfile.uid.toString()
+                UserProfile.email.toString()
             )
         }
     }

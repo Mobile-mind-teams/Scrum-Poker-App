@@ -13,11 +13,13 @@ import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentHomeBinding
 import com.example.scrumpokerapp.model.Session
+import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.view.adapter.SessionAdapter
+import com.example.scrumpokerapp.view.listener.CustomSessionItemListener
 import com.example.scrumpokerapp.viewmodel.HomeViewModel
 import com.example.scrumpokerapp.viewmodel.HomeViewModelFactory
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), CustomSessionItemListener {
 
     private lateinit var homeViewModel: HomeViewModel
 
@@ -46,23 +48,6 @@ class HomeFragment : Fragment() {
 
         homeViewModel.getSessionList()
 
-        //Cargar Recycler para Users
-        homeViewModel.historySessionListData.observe(viewLifecycleOwner, Observer {
-            if (it != null){
-                var sessionList: ArrayList<Session> = arrayListOf()
-                it.data.forEach {
-                    var sessionItem = Session(it.project_name.toString(), it.pid.toString(), it.sid.toString(), it.status.toString())
-                    sessionList.add(sessionItem)
-                }
-
-                binding.sessionsRecycler.apply {
-                    layoutManager = LinearLayoutManager(context)
-                    adapter = SessionAdapter(sessionList)
-                }
-            }
-        })
-
-        //Cargar Recycler para PO
         homeViewModel.sesionListData.observe(viewLifecycleOwner, Observer {
             if (it != null){
                 var sessionList: ArrayList<Session> = arrayListOf()
@@ -73,12 +58,17 @@ class HomeFragment : Fragment() {
 
                 binding.sessionsRecycler.apply {
                     layoutManager = LinearLayoutManager(context)
-                    adapter = SessionAdapter(sessionList)
+                    adapter = SessionAdapter(sessionList, this@HomeFragment)
                 }
             }
         })
 
         return binding.root
+    }
+
+    override fun getSelectedItem(session: Session) {
+        (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(false)
+        (activity as? MainActivity)?.replaceFragment(SessionFragment.newInstance(), "SessionFragment")
     }
 
 }

@@ -7,8 +7,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.model.Session
+import com.example.scrumpokerapp.view.listener.CustomSessionItemListener
 
-class SessionAdapter(val sessionList: ArrayList<Session>) : RecyclerView.Adapter<SessionAdapter.PokerSessionViewHolder>() {
+class SessionAdapter(val sessionList: ArrayList<Session>, val listener: CustomSessionItemListener) : RecyclerView.Adapter<SessionAdapter.PokerSessionViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PokerSessionViewHolder {
         return PokerSessionViewHolder(
@@ -24,6 +25,10 @@ class SessionAdapter(val sessionList: ArrayList<Session>) : RecyclerView.Adapter
 
     override fun onBindViewHolder(holder: PokerSessionViewHolder, position: Int) {
         holder.bind(sessionList[position])
+
+        holder.itemView.setOnClickListener {
+            listener.getSelectedItem(sessionList[position])
+        }
     }
 
     inner class PokerSessionViewHolder(view: View) : RecyclerView.ViewHolder(view) {
