@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.databinding.FragmentProfileBinding
 import com.example.scrumpokerapp.persistance.UserProfile
+import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.viewmodel.ProfileViewModel
 import com.example.scrumpokerapp.viewmodel.ProfileViewModelFactory
 
@@ -64,7 +65,9 @@ class ProfileFragment : Fragment() {
         profileViewModel.sessionStatus.observe(viewLifecycleOwner, Observer {
             if(it != null){
                 if(it){
-                    activity?.finish()
+                    (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(false)
+                    (activity as? MainActivity)?.mainActivityViewModel?.loggedStatus?.postValue(false)
+                    (activity as? MainActivity)?.replaceFragment(LogInFragment.newInstance(), "LogInFragment")
                 }
             }
         })

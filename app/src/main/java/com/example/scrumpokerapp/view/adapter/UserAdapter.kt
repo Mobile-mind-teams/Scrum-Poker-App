@@ -4,15 +4,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.compose.ui.graphics.Color
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.model.User
 import com.example.scrumpokerapp.view.listener.CustomUserItemListener
-import com.google.android.gms.common.util.Hex
 
 class UserAdapter(val list: List<User>, val listener: CustomUserItemListener? = null) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
@@ -33,12 +30,12 @@ class UserAdapter(val list: List<User>, val listener: CustomUserItemListener? = 
 
         holder.itemView.findViewById<LinearLayout>(R.id.touchablePart).setOnClickListener {
             holder.itemView.setBackgroundColor(android.graphics.Color.parseColor("#758CBB"))
-            listener?.getSelectedItemEmail(list[position].email.toString())
+            listener?.getSelectedUserItem(list[position])
         }
 
         holder.itemView.findViewById<ImageButton>(R.id.remove_addresse).setOnClickListener {
             holder.itemView.setBackgroundColor(android.graphics.Color.parseColor("#FFFFFF"))
-            listener?.dropSelectedItemEmail(list[position].email.toString())
+            listener?.dropSelectedUserItem(list[position])
         }
     }
 

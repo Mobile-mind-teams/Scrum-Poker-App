@@ -7,9 +7,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.model.Project
-import com.example.scrumpokerapp.view.listener.CustomItemListener
+import com.example.scrumpokerapp.view.listener.CustomProjectItemListener
 
-class ProjectAdapter(val list: List<Project>, val listener: CustomItemListener? = null) : RecyclerView.Adapter<ProjectAdapter.ViewHolder>() {
+class ProjectAdapter(val list: List<Project>, val listener: CustomProjectItemListener? = null) : RecyclerView.Adapter<ProjectAdapter.ViewHolder>() {
 
     var lastSelected = -1
 
@@ -44,7 +44,7 @@ class ProjectAdapter(val list: List<Project>, val listener: CustomItemListener? 
             lastSelected = position
             notifyItemChanged(lastSelected)
 
-            listener?.getSelectedItemDocId(list[position].name.toString())
+            listener?.getSelectedItem(list[position])
         }
     }
 

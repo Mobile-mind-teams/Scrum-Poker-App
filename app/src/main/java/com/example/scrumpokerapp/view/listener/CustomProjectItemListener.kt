@@ -1,7 +1,7 @@
 package com.example.scrumpokerapp.view.listener
 
-import com.example.scrumpokerapp.model.Session
+import com.example.scrumpokerapp.model.Project
 
-interface CustomSessionItemListener {
-    fun getSelectedItem(session: Session)
+interface CustomProjectItemListener {
+    fun getSelectedItem(project: Project)
 }

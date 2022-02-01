@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -15,14 +16,19 @@ import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentCreateSessionBinding
 import com.example.scrumpokerapp.model.Email
+import com.example.scrumpokerapp.model.Project
+import com.example.scrumpokerapp.model.Session
+import com.example.scrumpokerapp.model.User
+import com.example.scrumpokerapp.persistance.UserProfile
+import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.view.adapter.ProjectAdapter
 import com.example.scrumpokerapp.view.adapter.UserAdapter
-import com.example.scrumpokerapp.view.listener.CustomItemListener
+import com.example.scrumpokerapp.view.listener.CustomProjectItemListener
 import com.example.scrumpokerapp.view.listener.CustomUserItemListener
 import com.example.scrumpokerapp.viewmodel.CreateSessionViewModel
 import com.example.scrumpokerapp.viewmodel.CreateSessionViewModelFactory
 
-class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomItemListener {
+class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectItemListener {
 
     private lateinit var createSessionViewModel: CreateSessionViewModel
 
@@ -49,9 +55,7 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomItemListe
             CreateSessionViewModelFactory(ApiController())
         )[CreateSessionViewModel::class.java]
 
-        createSessionViewModel.loadAvailableUsersList()
-
-        createSessionViewModel.loadUnassignedProjects()
+        loadData()
 
         createSessionViewModel.projectListMutableLiveData.observe(viewLifecycleOwner, Observer {
             if (it != null){
@@ -62,7 +66,7 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomItemListe
             }
         })
 
-        createSessionViewModel.userListMutableLiveData.observe(viewLifecycleOwner, Observer {
+        createSessionViewModel.usersListMutableLiveData.observe(viewLifecycleOwner, Observer {
             if (it != null){
                 binding.usersRecycler.apply {
                     layoutManager = LinearLayoutManager(context)
@@ -71,56 +75,146 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomItemListe
             }
         })
 
-        createSessionViewModel.emailMutableLiveData.observe(viewLifecycleOwner, Observer {
-            if (it != null){
-                Toast.makeText(context,"Invitacion Enviada!", Toast.LENGTH_SHORT).show()
-                Log.i("Email Response: ","RAW: " + 200 + " " + it.toText())
-            } else {
-                Toast.makeText(context,"Invitacion No Enviada...", Toast.LENGTH_SHORT).show()
-            }
-
-            binding.progressBar.visibility = View.INVISIBLE
-        })
-
         binding.btnCreateSession.setOnClickListener {
             binding.progressBar.visibility = View.VISIBLE
-            createSessionViewModel.sendEmail(
-                Email(createSessionViewModel.projectName,createSessionViewModel.emailUserListToString())
+
+            createSessionViewModel.createSession(
+                Session(
+                    createSessionViewModel.projectItem.name.toString(),
+                    createSessionViewModel.projectItem.project_id.toString(),
+                    UserProfile.uid.toString(),
+                    createSessionViewModel.getSelectedUsersEmailList()
+                )
             )
-            Toast.makeText(context,"Enviando Invitacion...", Toast.LENGTH_SHORT).show()
+
+            Toast.makeText(context,"Creando Session...", Toast.LENGTH_SHORT).show()
         }
+
+        createSessionViewModel.newSessionMutableLiveData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+
+                Toast.makeText(context,"Enviando Invitaciones...", Toast.LENGTH_SHORT).show()
+
+                createSessionViewModel.sendEmail(
+                    Email(
+                        createSessionViewModel.projectItem.name.toString(),
+                        createSessionViewModel.emailAddresseUserList)
+                )
+            } else {
+                Toast.makeText(context,"Error al crear Session!", Toast.LENGTH_SHORT).show()
+                goToError(binding.progressBar)
+            }
+        })
+
+        createSessionViewModel.emailMutableLiveData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                if (it.isSuccess()){
+                    Toast.makeText(context,"Invitaciones Enviadas!", Toast.LENGTH_SHORT).show()
+                    Log.i("Email Response: ","RAW: " + 200 + " " + it.toText())
+                } else {
+                    Toast.makeText(context,"Surgio un error!", Toast.LENGTH_SHORT).show()
+                    Log.i("Email Response: ","ERROR: " + 500 + " " + it.errorToText())
+                    goToError(binding.progressBar)
+                }
+
+                Toast.makeText(context,"Actualizando Estados del Sistema...", Toast.LENGTH_SHORT).show()
+                createSessionViewModel.updateAdminStatus()
+            } else {
+                Toast.makeText(context,"Invitaciones No Enviadas...", Toast.LENGTH_SHORT).show()
+                goToError(binding.progressBar)
+            }
+        })
+
+        createSessionViewModel.adminUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                createSessionViewModel.updateUsersStatus()
+            } else {
+                Toast.makeText(context,"Error al Actualizar Estados!", Toast.LENGTH_SHORT).show()
+                goToError(binding.progressBar)
+            }
+        })
+
+        createSessionViewModel.usersUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                if (it.data.get(0).email.equals(
+                        createSessionViewModel.selectedUsersEmailList.get(
+                            createSessionViewModel.selectedUsersEmailList.lastIndex
+                        )
+                    )
+                ){
+                    Log.i("Last User Updated: ","Email: " + it.data.get(0).email.toString())
+                    createSessionViewModel.getNewSessionID()
+                } else {
+                    Log.i("User Updated: ","Email: " + it.data.get(0).email.toString())
+                }
+            }
+        })
+
+        createSessionViewModel.newSessionIDMutableLiveData.observe(viewLifecycleOwner, Observer {
+            if(it != null) {
+                createSessionViewModel.updateProjectStatus(
+                    Project(
+                        it.data.get(0).project_id.toString(),
+                        it.data.get(0).session_id.toString(),
+                        "assigned"
+                    )
+                )
+            }
+        })
+
+        createSessionViewModel.projectUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
+            if (it != null) {
+                Toast.makeText(context,"Estados Actualizados!", Toast.LENGTH_SHORT).show()
+
+                Toast.makeText(context,"Session Creada!", Toast.LENGTH_SHORT).show()
+
+                binding.progressBar.visibility = View.INVISIBLE
+                (activity as? MainActivity)?.replaceFragment(HomeFragment.newInstance(), "HomeFragment")
+            }
+        })
 
         return binding.root
     }
 
-    override fun getSelectedItemDocId(name: String) {
-        createSessionViewModel.projectName = name
+    private fun goToError(progressBar: ProgressBar) {
+        progressBar.visibility = View.INVISIBLE
+        (activity as? MainActivity)?.replaceFragment(HomeFragment.newInstance(), "HomeFragment")
     }
 
-    override fun getSelectedItemEmail(email: String) {
+    override fun getSelectedItem(project: Project) {
+        createSessionViewModel.projectItem = project
+    }
+
+    override fun getSelectedUserItem(user: User) {
         var existInList = false
-        if (createSessionViewModel.emailUserList.size > 0) {
-            for (currentMail: String in createSessionViewModel.emailUserList) {
-                if (email == currentMail) {
+        if (createSessionViewModel.selectedUsers.size > 0) {
+            for (currentUser: User in createSessionViewModel.selectedUsers) {
+                if (user.email == currentUser.email) {
                     existInList = true
                 }
             }
 
             if (!existInList){
-                createSessionViewModel.emailUserList.add(email)
+                createSessionViewModel.selectedUsers.add(user)
             }
         } else {
-            createSessionViewModel.emailUserList.add(email)
+            createSessionViewModel.selectedUsers.add(user)
         }
     }
 
-    override fun dropSelectedItemEmail(email: String) {
+    override fun dropSelectedUserItem(user: User) {
         try {
-            createSessionViewModel.emailUserList.removeAt(
-                createSessionViewModel.emailUserList.indexOf(email)
+            createSessionViewModel.selectedUsers.removeAt(
+                createSessionViewModel.selectedUsers.indexOf(user)
             )
         } catch (e: Exception){
 
         }
+    }
+
+    fun loadData(){
+        createSessionViewModel.loadAvailableUsersList()
+
+        createSessionViewModel.loadUnassignedProjects()
     }
 }
