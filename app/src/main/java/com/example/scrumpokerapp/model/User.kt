@@ -50,9 +50,9 @@ class User {
         this.uid = uid
     }
 
-    constructor(email: String?, uid: String?) {
+    constructor(email: String?,status: String?) {
+        this.status = status
         this.email = email
-        this.uid = uid
     }
 
     override fun toString(): String {

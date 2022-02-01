@@ -34,6 +34,16 @@ class Project{
         this.status = status
     }
 
+    constructor(
+        project_id: String?,
+        session_id: String?,
+        status: String?
+    ) {
+        this.project_id = project_id
+        this.session_id = session_id
+        this.status = status
+    }
+
     override fun toString(): String {
         return "Project => {\n" +
                 "name: ${name},\n" +
