@@ -112,9 +112,8 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectIt
                     Toast.makeText(context,"Invitaciones Enviadas!", Toast.LENGTH_SHORT).show()
                     Log.i("Email Response: ","RAW: " + 200 + " " + it.toText())
                 } else {
-                    Toast.makeText(context,"Surgio un error!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,"Surgio un error al enviar invitaciones!", Toast.LENGTH_SHORT).show()
                     Log.i("Email Response: ","ERROR: " + 500 + " " + it.errorToText())
-                    goToError(binding.progressBar)
                 }
 
                 Toast.makeText(context,"Actualizando Estados del Sistema...", Toast.LENGTH_SHORT).show()
@@ -169,6 +168,7 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectIt
                 Toast.makeText(context,"Session Creada!", Toast.LENGTH_SHORT).show()
 
                 binding.progressBar.visibility = View.INVISIBLE
+                (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(false)
                 (activity as? MainActivity)?.replaceFragment(HomeFragment.newInstance(), "HomeFragment")
             }
         })
