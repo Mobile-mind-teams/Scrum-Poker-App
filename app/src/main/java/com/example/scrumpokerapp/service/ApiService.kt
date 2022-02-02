@@ -60,4 +60,7 @@ interface ApiService {
     @PATCH("users/update/{id}")
     fun updateUser(@Body user: User, @Path("id") doc_id : String) : Call<UsersResponse>
 
+    @GET("cards/all/{type}")
+    fun getDeckFor(@Path("type") role_string: String): Call<CardsResponse>
+
 }

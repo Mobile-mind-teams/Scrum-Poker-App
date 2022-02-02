@@ -25,4 +25,10 @@ class ProjectUtils {
     fun showCreateSession(user: UserProfile?): Boolean {
         return isProjectOwner(user?.role) && isAvailable(user?.status)
     }
+
+    fun getRoleAsString(role: Int?): String {
+        return if (role==1){
+            "po"
+        } else "user"
+    }
 }

@@ -29,6 +29,7 @@ class ApiController {
     val projectResponseMutableLiveData : MutableLiveData<ProjectResponse?>
     val projectUpdateResponseMutableLiveData : MutableLiveData<ProjectResponse?>
     val emailResponseMutableLiveData : MutableLiveData<EmailResponse?>
+    val cardsResponseMutableLiveData : MutableLiveData<CardsResponse?>
 
     constructor(){
         userResponseMutableLiveData = MutableLiveData()
@@ -45,6 +46,7 @@ class ApiController {
         userListResponseMutableLiveData = MutableLiveData()
         userRegisterResponseMutableLiveData = MutableLiveData()
         userLoginResponseMutableLiveData = MutableLiveData()
+        cardsResponseMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -344,6 +346,25 @@ class ApiController {
             override fun onFailure(call: Call<SessionResponse>, t: Throwable) {
                 newSessionResponseMutableLiveData.postValue(null)
                 Log.i("Session Data: ","GET: " + 500 + " " + t.stackTrace.toString())
+            }
+        })
+    }
+
+    fun getDeckByUserRole(role_string: String){
+        service.getDeckFor(role_string).enqueue(object : Callback<CardsResponse>{
+            override fun onResponse(call: Call<CardsResponse>, response: Response<CardsResponse>) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                cardsResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<CardsResponse>, t: Throwable) {
+                cardsResponseMutableLiveData.postValue(null)
+                Log.i("Card Data: ","GET: " + 500 + " " + t.stackTrace.toString())
             }
         })
     }
