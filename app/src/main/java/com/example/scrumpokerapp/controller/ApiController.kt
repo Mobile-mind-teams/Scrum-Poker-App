@@ -6,9 +6,9 @@ import com.example.scrumpokerapp.model.Email
 import com.example.scrumpokerapp.model.Project
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.model.User
-import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.service.ApiClient
 import com.example.scrumpokerapp.service.response.*
+import com.example.scrumpokerapp.utils.ProjectUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -22,6 +22,7 @@ class ApiController {
     val userUpdateResponseMutableLiveData : MutableLiveData<UsersResponse?>
     val userListResponseMutableLiveData : MutableLiveData<UsersResponse?>
     val userResponseMutableLiveData : MutableLiveData<UsersResponse?>
+    val userLoginResponseMutableLiveData : MutableLiveData<UsersResponse?>
     val sessionResponseMutableLiveData : MutableLiveData<SessionResponse?>
     val newSessionResponseMutableLiveData : MutableLiveData<SessionResponse?>
     val backlogStoriesResponseMutableLiveData : MutableLiveData<BacklogStoryResponse?>
@@ -43,6 +44,7 @@ class ApiController {
         userUpdateResponseMutableLiveData = MutableLiveData()
         userListResponseMutableLiveData = MutableLiveData()
         userRegisterResponseMutableLiveData = MutableLiveData()
+        userLoginResponseMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -50,17 +52,6 @@ class ApiController {
             override fun onResponse(call: Call<UsersResponse>, response: Response<UsersResponse>) {
                 if (response.isSuccessful && response.body() != null){
                     Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data?.get(0))
-
-                    UserProfile.setUserProfile(
-                        response.body()?.data?.get(0)?.email.toString(),
-                        response.body()?.data?.get(0)?.password.toString(),
-                        response.body()?.data?.get(0)?.uid.toString(),
-                        response.body()?.data?.get(0)?.role.toString().toInt(),
-                        response.body()?.data?.get(0)?.user_name.toString(),
-                        response.body()?.data?.get(0)?.doc_id.toString(),
-                        response.body()?.data?.get(0)?.status.toString()
-                    )
-
                 } else {
                     Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }
@@ -295,7 +286,7 @@ class ApiController {
                     Log.i("${response.body()?.collection} Data PATCH: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }
 
-                if (role == UserProfile.role){
+                if (ProjectUtils().isProjectOwner(role)){
                     adminResponseMutableLiveData.postValue(response.body())
                 } else {
                     userUpdateResponseMutableLiveData.postValue(response.body())
@@ -303,7 +294,7 @@ class ApiController {
             }
 
             override fun onFailure(call: Call<UsersResponse>, t: Throwable) {
-                if (role == UserProfile.role){
+                if (ProjectUtils().isProjectOwner(role)){
                     adminResponseMutableLiveData.postValue(null)
                 } else {
                     userUpdateResponseMutableLiveData.postValue(null)

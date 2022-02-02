@@ -1,6 +1,5 @@
 package com.example.scrumpokerapp.view.fragment
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +13,6 @@ import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentSignUpBinding
 import com.example.scrumpokerapp.model.User
-import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.viewmodel.SignUpViewModel
 import com.example.scrumpokerapp.viewmodel.SignUpViewModelFactory

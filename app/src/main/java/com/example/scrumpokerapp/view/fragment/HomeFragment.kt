@@ -46,7 +46,9 @@ class HomeFragment : Fragment(), CustomSessionItemListener {
             HomeViewModelFactory(ApiController(), requireActivity().application)
         )[HomeViewModel::class.java]
 
-        homeViewModel.getSessionList()
+        homeViewModel.getSessionList(
+            (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
+        )
 
         homeViewModel.sesionListData.observe(viewLifecycleOwner, Observer {
             if (it != null){

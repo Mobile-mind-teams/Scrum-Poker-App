@@ -1,7 +1,6 @@
 package com.example.scrumpokerapp.view.activity
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -12,9 +11,8 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.scrumpokerapp.R
-import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.ActivityMainBinding
-import com.example.scrumpokerapp.persistance.UserProfile
+import com.example.scrumpokerapp.utils.ProjectUtils
 import com.example.scrumpokerapp.view.fragment.*
 import com.example.scrumpokerapp.viewmodel.MainActivityViewModel
 import com.example.scrumpokerapp.viewmodel.MainActivityViewModelFactory
@@ -43,12 +41,20 @@ class MainActivity : AppCompatActivity() {
                 if (it){
                     binding.bottomNavigationMenu.visibility = View.VISIBLE
 
-                    if (UserProfile.isProductOwner() && UserProfile.isAvailable()){
-                        binding.bottomNavigationMenu.menu.getItem(3).isVisible = true
+                    if (ProjectUtils().showCreateSession(
+                            mainActivityViewModel.userData?.value
+                    )){
+                        mainActivityViewModel.showCreateSessionBottomNavigationMenuItem.postValue(true)
                     }
                 } else {
                     binding.bottomNavigationMenu.visibility = View.GONE
                 }
+            }
+        })
+
+        mainActivityViewModel.showCreateSessionBottomNavigationMenuItem.observe(this, Observer {
+            if (it != null){
+                binding.bottomNavigationMenu.menu.getItem(3).isVisible = it
             }
         })
 

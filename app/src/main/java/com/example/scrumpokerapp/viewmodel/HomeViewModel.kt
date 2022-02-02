@@ -5,11 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.persistance.UserProfile
-import com.example.scrumpokerapp.repository.AuthenticationRepository
 import com.example.scrumpokerapp.service.response.SessionResponse
-import com.example.scrumpokerapp.service.response.SessionsHistoryResponse
-import com.example.scrumpokerapp.service.response.UsersResponse
-import com.google.firebase.auth.FirebaseUser
+import com.example.scrumpokerapp.utils.ProjectUtils
 
 class HomeViewModel (
     val apiController: ApiController,
@@ -26,14 +23,14 @@ class HomeViewModel (
         apiController.getAllSessions(po_id)
     }
 
-    fun getSessionList(){
-        if (UserProfile.isProductOwner()){
+    fun getSessionList(userProfile: UserProfile?){
+        if (ProjectUtils().isProjectOwner(userProfile?.role)){
             getAllSessions(
-                UserProfile.uid.toString()
+                userProfile?.uid.toString()
             )
         } else {
             getAllUserSessions(
-                UserProfile.email.toString()
+                userProfile?.email.toString()
             )
         }
     }

@@ -11,7 +11,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.databinding.FragmentProfileBinding
-import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.viewmodel.ProfileViewModel
 import com.example.scrumpokerapp.viewmodel.ProfileViewModelFactory
@@ -49,14 +48,22 @@ class ProfileFragment : Fragment() {
             android.R.layout.simple_spinner_item
         ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.etRole.setText(adapter.getItem(UserProfile.role.toString().toInt()).toString())
+            binding.etRole.setText(adapter.getItem(
+                (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.role!!
+            ).toString())
         }
 
-        binding.etEmail.setText(UserProfile.email)
+        binding.etEmail.setText(
+            (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.email
+        )
 
-        binding.etUserName.setText(UserProfile.user_name)
+        binding.etUserName.setText(
+            (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.user_name
+        )
 
-        binding.etStatus.setText(UserProfile.status)
+        binding.etStatus.setText(
+            (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.status
+        )
 
         binding.btnLogOut.setOnClickListener {
             profileViewModel.logOut()

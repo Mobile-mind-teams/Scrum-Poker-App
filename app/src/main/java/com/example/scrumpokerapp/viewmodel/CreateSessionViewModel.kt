@@ -12,6 +12,7 @@ import com.example.scrumpokerapp.service.response.EmailResponse
 import com.example.scrumpokerapp.service.response.ProjectResponse
 import com.example.scrumpokerapp.service.response.SessionResponse
 import com.example.scrumpokerapp.service.response.UsersResponse
+import com.example.scrumpokerapp.utils.ProjectUtils
 
 class CreateSessionViewModel(
     val apiController: ApiController
@@ -47,14 +48,14 @@ class CreateSessionViewModel(
         apiController.createNewSession(session)
     }
 
-    fun updateAdminStatus(){
+    fun updateAdminStatus(userProfile: UserProfile?){
         apiController.updateUser(
             User(
-                UserProfile.email,
-            "unavailable"
+                userProfile?.email.toString(),
+                "unavailable"
             ),
-            UserProfile.doc_id.toString(),
-            UserProfile.role
+            userProfile?.doc_id.toString(),
+            userProfile?.role
         )
     }
 
@@ -86,9 +87,9 @@ class CreateSessionViewModel(
         return selectedUsersEmailList
     }
 
-    fun getNewSessionID(){
+    fun getNewSessionID(userProfile: UserProfile?){
         apiController.getJustCreatedSession(
-            UserProfile.uid.toString(),
+            userProfile?.uid.toString(),
             "new"
         )
     }
@@ -97,5 +98,10 @@ class CreateSessionViewModel(
         apiController.updateProject(
             project
         )
+    }
+
+    fun updateUserProfile(userProfile: UserProfile?) : UserProfile{
+        userProfile?.status = "unavailable"
+        return userProfile!!
     }
 }

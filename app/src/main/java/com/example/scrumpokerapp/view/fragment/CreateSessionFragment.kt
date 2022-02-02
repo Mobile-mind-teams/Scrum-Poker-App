@@ -19,7 +19,6 @@ import com.example.scrumpokerapp.model.Email
 import com.example.scrumpokerapp.model.Project
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.model.User
-import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.view.adapter.ProjectAdapter
 import com.example.scrumpokerapp.view.adapter.UserAdapter
@@ -82,7 +81,7 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectIt
                 Session(
                     createSessionViewModel.projectItem.name.toString(),
                     createSessionViewModel.projectItem.project_id.toString(),
-                    UserProfile.uid.toString(),
+                    (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.uid.toString(),
                     createSessionViewModel.getSelectedUsersEmailList()
                 )
             )
@@ -117,7 +116,9 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectIt
                 }
 
                 Toast.makeText(context,"Actualizando Estados del Sistema...", Toast.LENGTH_SHORT).show()
-                createSessionViewModel.updateAdminStatus()
+                createSessionViewModel.updateAdminStatus(
+                    (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
+                )
             } else {
                 Toast.makeText(context,"Invitaciones No Enviadas...", Toast.LENGTH_SHORT).show()
                 goToError(binding.progressBar)
@@ -126,6 +127,11 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectIt
 
         createSessionViewModel.adminUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
             if(it != null){
+                (activity as? MainActivity)?.mainActivityViewModel?.userData?.postValue(
+                    createSessionViewModel.updateUserProfile(
+                        (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
+                    )
+                )
                 createSessionViewModel.updateUsersStatus()
             } else {
                 Toast.makeText(context,"Error al Actualizar Estados!", Toast.LENGTH_SHORT).show()
@@ -142,7 +148,9 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectIt
                     )
                 ){
                     Log.i("Last User Updated: ","Email: " + it.data.get(0).email.toString())
-                    createSessionViewModel.getNewSessionID()
+                    createSessionViewModel.getNewSessionID(
+                        (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
+                    )
                 } else {
                     Log.i("User Updated: ","Email: " + it.data.get(0).email.toString())
                 }
@@ -168,7 +176,7 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectIt
                 Toast.makeText(context,"Session Creada!", Toast.LENGTH_SHORT).show()
 
                 binding.progressBar.visibility = View.INVISIBLE
-                (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(false)
+                (activity as? MainActivity)?.mainActivityViewModel?.showCreateSessionBottomNavigationMenuItem?.postValue(false)
                 (activity as? MainActivity)?.replaceFragment(HomeFragment.newInstance(), "HomeFragment")
             }
         })
