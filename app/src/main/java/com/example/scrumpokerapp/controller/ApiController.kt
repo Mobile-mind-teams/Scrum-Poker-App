@@ -30,6 +30,7 @@ class ApiController {
     val projectUpdateResponseMutableLiveData : MutableLiveData<ProjectResponse?>
     val emailResponseMutableLiveData : MutableLiveData<EmailResponse?>
     val cardsResponseMutableLiveData : MutableLiveData<CardsResponse?>
+    val sessionStoriesResponseMutableLiveData : MutableLiveData<SessionStoriesResponse?>
 
     constructor(){
         userResponseMutableLiveData = MutableLiveData()
@@ -47,6 +48,7 @@ class ApiController {
         userRegisterResponseMutableLiveData = MutableLiveData()
         userLoginResponseMutableLiveData = MutableLiveData()
         cardsResponseMutableLiveData = MutableLiveData()
+        sessionStoriesResponseMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -365,6 +367,28 @@ class ApiController {
             override fun onFailure(call: Call<CardsResponse>, t: Throwable) {
                 cardsResponseMutableLiveData.postValue(null)
                 Log.i("Card Data: ","GET: " + 500 + " " + t.stackTrace.toString())
+            }
+        })
+    }
+
+    fun getStoryListBySessionID(session_id: String){
+        service.getAllSessionStories(session_id).enqueue(object : Callback<SessionStoriesResponse>{
+            override fun onResponse(
+                call: Call<SessionStoriesResponse>,
+                response: Response<SessionStoriesResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                sessionStoriesResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<SessionStoriesResponse>, t: Throwable) {
+                sessionStoriesResponseMutableLiveData.postValue(null)
+                Log.i("Session Stories Data: ","GET: " + 500 + " " + t.stackTrace.toString())
             }
         })
     }

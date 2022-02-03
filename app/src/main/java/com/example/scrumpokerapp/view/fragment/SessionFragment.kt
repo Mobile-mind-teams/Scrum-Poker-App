@@ -53,9 +53,17 @@ class SessionFragment : Fragment() {
             )
         )
 
+        sessionViewModel.getSessionStories("x4mHnBMSGGVKF9FRNCCY")
+
         sessionViewModel.deckData.observe(viewLifecycleOwner, Observer {
             if(it != null){
                 Log.i("Deck List: ","Cards: " + it.toText())
+            }
+        })
+
+        sessionViewModel.sessionStoryList.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                Log.i("Session Story List: ","session-story: " + it.toText())
             }
         })
 

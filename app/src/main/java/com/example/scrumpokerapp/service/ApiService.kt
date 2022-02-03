@@ -15,8 +15,8 @@ interface ApiService {
     @GET("users/{id}")
     fun getUserById(@Path("id") uid: String): Call<UsersResponse>
 
-    @GET("session-history/users/all/{id}")
-    fun getAllUserSessions(@Path("id") uid: String): Call<SessionsHistoryResponse>
+    @GET("stories/session/all/{id}")
+    fun getAllSessionStories(@Path("id") session_id: String): Call<SessionStoriesResponse>
 
     @GET("sessions/team/{email}")
     fun getAllUserSessionsByEmail(@Path("email") email: String): Call<SessionResponse>
