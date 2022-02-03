@@ -1,9 +1,6 @@
 package com.example.scrumpokerapp.service
 
-import com.example.scrumpokerapp.model.Email
-import com.example.scrumpokerapp.model.Project
-import com.example.scrumpokerapp.model.Session
-import com.example.scrumpokerapp.model.User
+import com.example.scrumpokerapp.model.*
 import com.example.scrumpokerapp.service.response.*
 import retrofit2.Call
 import retrofit2.http.*
@@ -62,5 +59,8 @@ interface ApiService {
 
     @GET("cards/all/{type}")
     fun getDeckFor(@Path("type") role_string: String): Call<CardsResponse>
+
+    @POST("table-cards/add/{document_id}")
+    fun setTableCard(@Body userCard: UserCard, @Path("document_id") session_id: String): Call<TableCardResponse>
 
 }

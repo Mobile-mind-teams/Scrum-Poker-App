@@ -12,6 +12,8 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentSessionBinding
+import com.example.scrumpokerapp.model.UserCard
+import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.utils.ProjectUtils
 import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.viewmodel.SessionViewModel
@@ -55,6 +57,23 @@ class SessionFragment : Fragment() {
 
         sessionViewModel.getSessionStories("x4mHnBMSGGVKF9FRNCCY")
 
+        var insert = true
+        if (insert){
+            sessionViewModel.setTableCard(
+                UserCard(
+                    (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.uid,
+                    -1.0,
+                    "askForPartition",
+                    false,
+                    "qOhM5TjqxgJ6WsXV6Ove",
+                    "infinito"
+                ),
+                "x4mHnBMSGGVKF9FRNCCY"
+            )
+
+            insert = false
+        }
+
         sessionViewModel.deckData.observe(viewLifecycleOwner, Observer {
             if(it != null){
                 Log.i("Deck List: ","Cards: " + it.toText())
@@ -64,6 +83,12 @@ class SessionFragment : Fragment() {
         sessionViewModel.sessionStoryList.observe(viewLifecycleOwner, Observer {
             if(it != null){
                 Log.i("Session Story List: ","session-story: " + it.toText())
+            }
+        })
+
+        sessionViewModel.tableCardSent.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                Log.i("Table Card: ","POST: " + it.toText())
             }
         })
 

@@ -2,10 +2,7 @@ package com.example.scrumpokerapp.controller
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.example.scrumpokerapp.model.Email
-import com.example.scrumpokerapp.model.Project
-import com.example.scrumpokerapp.model.Session
-import com.example.scrumpokerapp.model.User
+import com.example.scrumpokerapp.model.*
 import com.example.scrumpokerapp.service.ApiClient
 import com.example.scrumpokerapp.service.response.*
 import com.example.scrumpokerapp.utils.ProjectUtils
@@ -31,6 +28,7 @@ class ApiController {
     val emailResponseMutableLiveData : MutableLiveData<EmailResponse?>
     val cardsResponseMutableLiveData : MutableLiveData<CardsResponse?>
     val sessionStoriesResponseMutableLiveData : MutableLiveData<SessionStoriesResponse?>
+    val tableCardResponseMutableLiveData : MutableLiveData<TableCardResponse?>
 
     constructor(){
         userResponseMutableLiveData = MutableLiveData()
@@ -49,6 +47,7 @@ class ApiController {
         userLoginResponseMutableLiveData = MutableLiveData()
         cardsResponseMutableLiveData = MutableLiveData()
         sessionStoriesResponseMutableLiveData = MutableLiveData()
+        tableCardResponseMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -389,6 +388,28 @@ class ApiController {
             override fun onFailure(call: Call<SessionStoriesResponse>, t: Throwable) {
                 sessionStoriesResponseMutableLiveData.postValue(null)
                 Log.i("Session Stories Data: ","GET: " + 500 + " " + t.stackTrace.toString())
+            }
+        })
+    }
+
+    fun setTableCard(card: UserCard, session_id: String){
+        service.setTableCard(card, session_id).enqueue(object : Callback<TableCardResponse>{
+            override fun onResponse(
+                call: Call<TableCardResponse>,
+                response: Response<TableCardResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data POST: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data POST: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                tableCardResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<TableCardResponse>, t: Throwable) {
+                tableCardResponseMutableLiveData.postValue(null)
+                Log.i("Table Card Data: ","POST: " + 500 + " " + t.stackTrace.toString())
             }
         })
     }
