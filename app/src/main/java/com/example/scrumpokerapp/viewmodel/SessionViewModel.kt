@@ -3,9 +3,9 @@ package com.example.scrumpokerapp.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.scrumpokerapp.controller.ApiController
-import com.example.scrumpokerapp.controller.SnapshotRepository
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.model.UserCard
+import com.example.scrumpokerapp.repository.SnapshotRepository
 import com.example.scrumpokerapp.service.response.CardsResponse
 import com.example.scrumpokerapp.service.response.SessionStoriesResponse
 import com.example.scrumpokerapp.service.response.TableCardResponse
