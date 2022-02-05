@@ -1,4 +1,4 @@
-package com.example.scrumpokerapp.controller
+package com.example.scrumpokerapp.repository
 
 import android.content.ContentValues
 import android.util.Log
