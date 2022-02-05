@@ -13,13 +13,10 @@ import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentSessionBinding
 import com.example.scrumpokerapp.model.UserCard
-import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.utils.ProjectUtils
 import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.viewmodel.SessionViewModel
 import com.example.scrumpokerapp.viewmodel.SessionViewModelFactory
-import com.example.scrumpokerapp.viewmodel.SignUpViewModel
-import com.example.scrumpokerapp.viewmodel.SignUpViewModelFactory
 
 class SessionFragment : Fragment() {
 
@@ -46,7 +43,7 @@ class SessionFragment : Fragment() {
 
         sessionViewModel = ViewModelProviders.of(
             this,
-            SessionViewModelFactory(ApiController(), requireActivity().application)
+            SessionViewModelFactory(ApiController())
         )[SessionViewModel::class.java]
 
         sessionViewModel.getDeckByUserRole(
@@ -54,6 +51,8 @@ class SessionFragment : Fragment() {
                 (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.role
             )
         )
+
+        sessionViewModel.getSessionSnapshot()
 
         sessionViewModel.getSessionStories("x4mHnBMSGGVKF9FRNCCY")
 
@@ -89,6 +88,12 @@ class SessionFragment : Fragment() {
         sessionViewModel.tableCardSent.observe(viewLifecycleOwner, Observer {
             if(it != null){
                 Log.i("Table Card: ","POST: " + it.toText())
+            }
+        })
+
+        sessionViewModel.sessionData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                Log.i("Table Card: ","POST: " + it.toItemCard())
             }
         })
 
