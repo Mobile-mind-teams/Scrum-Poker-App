@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -13,6 +14,7 @@ import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentHomeBinding
 import com.example.scrumpokerapp.model.Session
+import com.example.scrumpokerapp.utils.ProjectUtils
 import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.view.adapter.SessionAdapter
 import com.example.scrumpokerapp.view.listener.CustomSessionItemListener
@@ -50,11 +52,25 @@ class HomeFragment : Fragment(), CustomSessionItemListener {
             (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
         )
 
+        if (!ProjectUtils().isProjectOwner(
+                (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.role!!
+        )){
+            homeViewModel.loadUserSessionSnapshot(
+                (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.email.toString()
+            )
+        }
+
         homeViewModel.sesionListData.observe(viewLifecycleOwner, Observer {
             if (it != null){
                 var sessionList: ArrayList<Session> = arrayListOf()
                 it.data.forEach {
-                    var sessionItem = Session(it.project_name.toString(), it.project_id.toString(), it.session_id.toString(),it.status.toString())
+                    var sessionItem = Session(
+                        it.project_name.toString(),
+                        it.project_id.toString(),
+                        it.session_id.toString(),
+                        it.status.toString(),
+                        it.teamList
+                    )
                     sessionList.add(sessionItem)
                 }
 
@@ -65,12 +81,44 @@ class HomeFragment : Fragment(), CustomSessionItemListener {
             }
         })
 
+        homeViewModel.sessionStatusData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                if (it){
+                    goToSession()
+                }
+            }
+        })
+
+        homeViewModel.sesionUpdateData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                if (it.data.get(0).status == "inProgress"){
+                    goToSession()
+                }
+            }
+        })
+
+        homeViewModel.userSessionData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                homeViewModel.getSessionList(
+                    (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
+                )
+                Toast.makeText(context,"Listado Actualizado!", Toast.LENGTH_SHORT).show()
+            }
+        })
+
         return binding.root
     }
 
     override fun getSelectedItem(session: Session) {
+        homeViewModel.processActionByUserRole(
+            session,
+            ProjectUtils().isProjectOwner(
+            (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.role
+        ))
+    }
+
+    fun goToSession(){
         (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(false)
         (activity as? MainActivity)?.replaceFragment(SessionFragment.newInstance(), "SessionFragment")
     }
-
 }

@@ -31,6 +31,7 @@ class ApiController {
     val tableCardResponseMutableLiveData : MutableLiveData<TableCardResponse?>
     val storySessionListMutableLiveData : MutableLiveData<SessionStoriesResponse?>
     val projectStoryListMutableLiveData : MutableLiveData<ProjectStoryResponse?>
+    val sessionUpdateMutableLiveData : MutableLiveData<SessionResponse?>
 
 
     constructor(){
@@ -53,6 +54,7 @@ class ApiController {
         tableCardResponseMutableLiveData = MutableLiveData()
         storySessionListMutableLiveData = MutableLiveData()
         projectStoryListMutableLiveData = MutableLiveData()
+        sessionUpdateMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -486,6 +488,28 @@ class ApiController {
             override fun onFailure(call: Call<TableCardResponse>, t: Throwable) {
                 tableCardResponseMutableLiveData.postValue(null)
                 Log.i("Table Card Data: ","POST: " + 500 + " " + t.stackTrace.toString())
+            }
+        })
+    }
+
+    fun updateSession(session: Session){
+        service.updateSession(session, session.session_id!!).enqueue(object : Callback<SessionResponse>{
+            override fun onResponse(
+                call: Call<SessionResponse>,
+                response: Response<SessionResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data PATCH: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data PATCH: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                sessionUpdateMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<SessionResponse>, t: Throwable) {
+                sessionUpdateMutableLiveData.postValue(null)
+                Log.i("Session Data: ","PATCH: " + 500 + " " + t.stackTrace.toString())
             }
         })
     }

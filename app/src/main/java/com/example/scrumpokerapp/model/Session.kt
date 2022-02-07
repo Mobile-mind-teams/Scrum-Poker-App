@@ -36,6 +36,20 @@ class Session {
         project_name: String,
         project_id: String,
         session_id: String,
+        status: String,
+        teamList: List<String>
+    ){
+        this.project_name = project_name
+        this.project_id = project_id
+        this.session_id = session_id
+        this.status = status
+        this.teamList = teamList
+    }
+
+    constructor(
+        project_name: String,
+        project_id: String,
+        session_id: String,
         status: String
     ){
         this.project_name = project_name

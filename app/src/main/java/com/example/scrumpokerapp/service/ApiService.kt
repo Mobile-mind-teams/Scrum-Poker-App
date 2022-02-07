@@ -72,4 +72,6 @@ interface ApiService {
                           @Path("story_id") story_id: String?
     ): Call<SessionStoriesResponse>
 
+    @PATCH("sessions/update/{id}")
+    fun updateSession(@Body session: Session, @Path("id") session_id : String) : Call<SessionResponse>
 }
