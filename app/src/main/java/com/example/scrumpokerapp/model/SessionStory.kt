@@ -12,6 +12,19 @@ class SessionStory {
     @SerializedName("note") var note : String? = null
     @SerializedName("sid") var doc_id : String? = null
 
+    constructor()
+
+    constructor(title: String?, description: String?, doc_id: String?) {
+        this.title = title
+        this.description = description
+        this.weight = 0.0
+        this.read_status = false
+        this.agreed_status = false
+        this.visibility = true
+        this.doc_id = doc_id
+        this.note = ""
+    }
+
     fun transformToJASONtxt(): String {
         return "\tSessionStory => {\n" +
                 "\ttitle: ${title},\n" +

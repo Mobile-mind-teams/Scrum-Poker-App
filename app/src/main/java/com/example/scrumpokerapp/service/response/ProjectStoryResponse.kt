@@ -1,29 +1,21 @@
 package com.example.scrumpokerapp.service.response
 
-import com.example.scrumpokerapp.model.SessionStory
+import com.example.scrumpokerapp.model.ProjectStory
 import com.google.gson.annotations.SerializedName
 
-class SessionStoriesResponse {
+class ProjectStoryResponse {
     @SerializedName("collection") var collection : String = ""
     @SerializedName("message") var message : String = ""
-    @SerializedName("data") var data : List<SessionStory> = listOf()
-
-    constructor()
-
-    constructor(collection: String, message: String, data: List<SessionStory>) {
-        this.collection = collection
-        this.message = message
-        this.data = data
-    }
+    @SerializedName("data") var data : List<ProjectStory> = listOf()
 
     fun toText(): String {
-        return "SessionStoriesResponse => {\n" +
+        return "ProjectStoryResponse => {\n" +
                 "message: ${message},\n" +
                 "data: [${objectListToString(data)}],\n" +
                 "}"
     }
 
-    fun objectListToString(itemList: List<SessionStory>): String{
+    fun objectListToString(itemList: List<ProjectStory>): String{
         var list = ""
         for (item in itemList) {
             list = "\t\t${item.transformToJASONtxt()},\n${list}\t\t"

@@ -63,4 +63,13 @@ interface ApiService {
     @POST("table-cards/add/{document_id}")
     fun setTableCard(@Body userCard: UserCard, @Path("document_id") session_id: String): Call<TableCardResponse>
 
+    @GET("stories/project/all/{id}")
+    fun getAllStoriesFromProject(@Path("id") project_id: String): Call<ProjectStoryResponse>
+
+    @POST("stories/add/{document_id}&{story_id}&session")
+    fun addStoryToSession(@Body sessionStory: SessionStory,
+                          @Path("document_id") session_id: String,
+                          @Path("story_id") story_id: String?
+    ): Call<SessionStoriesResponse>
+
 }

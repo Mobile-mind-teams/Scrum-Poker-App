@@ -3,15 +3,9 @@ package com.example.scrumpokerapp.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.scrumpokerapp.controller.ApiController
-import com.example.scrumpokerapp.model.Email
-import com.example.scrumpokerapp.model.Project
-import com.example.scrumpokerapp.model.Session
-import com.example.scrumpokerapp.model.User
+import com.example.scrumpokerapp.model.*
 import com.example.scrumpokerapp.persistance.UserProfile
-import com.example.scrumpokerapp.service.response.EmailResponse
-import com.example.scrumpokerapp.service.response.ProjectResponse
-import com.example.scrumpokerapp.service.response.SessionResponse
-import com.example.scrumpokerapp.service.response.UsersResponse
+import com.example.scrumpokerapp.service.response.*
 import com.example.scrumpokerapp.utils.ProjectUtils
 
 class CreateSessionViewModel(
@@ -25,12 +19,15 @@ class CreateSessionViewModel(
     val emailMutableLiveData : MutableLiveData<EmailResponse?> = apiController.emailResponseMutableLiveData
     val newSessionMutableLiveData : MutableLiveData<SessionResponse?> = apiController.sessionResponseMutableLiveData
     val newSessionIDMutableLiveData : MutableLiveData<SessionResponse?> = apiController.newSessionResponseMutableLiveData
+    val projectStoryListMutableLiveData : MutableLiveData<ProjectStoryResponse?> = apiController.projectStoryListMutableLiveData
+    val sessionStoryListMutableLiveData : MutableLiveData<SessionStoriesResponse?> = apiController.storySessionListMutableLiveData
 
     var projectItem : Project = Project()
     var emailAddresseUserList : String = ""
     var selectedUsers : ArrayList<User> = arrayListOf()
     val selectedUsersEmailList: ArrayList<String> = arrayListOf()
     var usersToUpdate: Int = 0
+    var storyList: List<SessionStory> = listOf()
 
     fun loadAvailableUsersList(){
         apiController.getAllAvailableUsers()
@@ -103,5 +100,13 @@ class CreateSessionViewModel(
     fun updateUserProfile(userProfile: UserProfile?) : UserProfile{
         userProfile?.status = "unavailable"
         return userProfile!!
+    }
+
+    fun getProjectStories(project_id: String){
+        apiController.getAllProjectStories(project_id)
+    }
+
+    fun addStoriesToSession(storyList: List<SessionStory>, session_id: String){
+        apiController.addStoriesToSession(storyList, session_id)
     }
 }

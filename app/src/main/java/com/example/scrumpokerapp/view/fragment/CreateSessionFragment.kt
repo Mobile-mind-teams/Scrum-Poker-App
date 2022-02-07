@@ -19,6 +19,7 @@ import com.example.scrumpokerapp.model.Email
 import com.example.scrumpokerapp.model.Project
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.model.User
+import com.example.scrumpokerapp.utils.ProjectUtils
 import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.view.adapter.ProjectAdapter
 import com.example.scrumpokerapp.view.adapter.UserAdapter
@@ -91,7 +92,19 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectIt
 
         createSessionViewModel.newSessionMutableLiveData.observe(viewLifecycleOwner, Observer {
             if(it != null){
+                Toast.makeText(context,"Obteniendo Historias de la Session...", Toast.LENGTH_SHORT).show()
 
+                createSessionViewModel.getProjectStories(
+                    createSessionViewModel.projectItem.project_id.toString()
+                )
+            } else {
+                Toast.makeText(context,"Error al crear Session!", Toast.LENGTH_SHORT).show()
+                goToError(binding.progressBar)
+            }
+        })
+
+        createSessionViewModel.projectStoryListMutableLiveData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
                 Toast.makeText(context,"Enviando Invitaciones...", Toast.LENGTH_SHORT).show()
 
                 createSessionViewModel.sendEmail(
@@ -159,10 +172,23 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectIt
 
         createSessionViewModel.newSessionIDMutableLiveData.observe(viewLifecycleOwner, Observer {
             if(it != null) {
+                Toast.makeText(context,"Agregando Historias a la Session...", Toast.LENGTH_SHORT).show()
+
+                createSessionViewModel.addStoriesToSession(
+                    ProjectUtils().convertProjectStoriesToSessionStories(
+                        createSessionViewModel.projectStoryListMutableLiveData.value?.data!!
+                    ),
+                    it.data.get(0).session_id.toString()
+                )
+            }
+        })
+
+        createSessionViewModel.sessionStoryListMutableLiveData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
                 createSessionViewModel.updateProjectStatus(
                     Project(
-                        it.data.get(0).project_id.toString(),
-                        it.data.get(0).session_id.toString(),
+                        createSessionViewModel.newSessionIDMutableLiveData.value?.data?.get(0)?.project_id.toString(),
+                        createSessionViewModel.newSessionIDMutableLiveData.value?.data?.get(0)?.session_id.toString(),
                         "assigned"
                     )
                 )
@@ -171,6 +197,8 @@ class CreateSessionFragment: Fragment(), CustomUserItemListener, CustomProjectIt
 
         createSessionViewModel.projectUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
             if (it != null) {
+                Toast.makeText(context,"Historias Agregadas a la Sesion!", Toast.LENGTH_SHORT).show()
+
                 Toast.makeText(context,"Estados Actualizados!", Toast.LENGTH_SHORT).show()
 
                 Toast.makeText(context,"Session Creada!", Toast.LENGTH_SHORT).show()

@@ -29,6 +29,9 @@ class ApiController {
     val cardsResponseMutableLiveData : MutableLiveData<CardsResponse?>
     val sessionStoriesResponseMutableLiveData : MutableLiveData<SessionStoriesResponse?>
     val tableCardResponseMutableLiveData : MutableLiveData<TableCardResponse?>
+    val storySessionListMutableLiveData : MutableLiveData<SessionStoriesResponse?>
+    val projectStoryListMutableLiveData : MutableLiveData<ProjectStoryResponse?>
+
 
     constructor(){
         userResponseMutableLiveData = MutableLiveData()
@@ -48,6 +51,8 @@ class ApiController {
         cardsResponseMutableLiveData = MutableLiveData()
         sessionStoriesResponseMutableLiveData = MutableLiveData()
         tableCardResponseMutableLiveData = MutableLiveData()
+        storySessionListMutableLiveData = MutableLiveData()
+        projectStoryListMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -211,6 +216,77 @@ class ApiController {
             override fun onFailure(call: Call<SessionResponse>, t: Throwable) {
                 sessionResponseMutableLiveData.postValue(null)
                 Log.i("Session Data: ","POST: " + 500 + " " + t.stackTraceToString())
+            }
+        })
+    }
+
+    fun addStoriesToSession(
+        storySessionListStory: List<SessionStory>,
+        session_id: String
+    ){
+        var storySessionListResponse: ArrayList<SessionStory?> = arrayListOf()
+        var collection: String = ""
+        var message: String = ""
+        var isSuccessfulProcess: Boolean = true
+        var index = 0
+        for(sessionStory in storySessionListStory){
+            service.addStoryToSession(sessionStory, session_id, sessionStory.doc_id).enqueue(object : Callback<SessionStoriesResponse>{
+                override fun onResponse(
+                    call: Call<SessionStoriesResponse>,
+                    response: Response<SessionStoriesResponse>
+                ) {
+                    if (response.isSuccessful && response.body() != null){
+                        Log.i("${response.body()?.collection} Data POST: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                    } else {
+                        Log.i("${response.body()?.collection} Data POST: ", "${response.body()?.message} " + 200 + " Not Found!")
+                    }
+
+                    if (collection == "" && message == ""){
+                        collection = response.body()?.collection.toString()
+                        message = response.body()?.message.toString()
+                    }
+
+                    storySessionListResponse.add(response.body()?.data?.get(index))
+                }
+
+                override fun onFailure(call: Call<SessionStoriesResponse>, t: Throwable) {
+                    isSuccessfulProcess = false
+                    Log.i("Session Story Data: ","POST: " + 500 + " " + t.stackTraceToString())
+                }
+            })
+        }
+
+        if (isSuccessfulProcess){
+            storySessionListMutableLiveData.postValue(
+                SessionStoriesResponse(
+                    collection,
+                    message,
+                    storySessionListStory
+                )
+            )
+        } else {
+            storySessionListMutableLiveData.postValue(null)
+        }
+    }
+
+    fun getAllProjectStories(project_id: String){
+        service.getAllStoriesFromProject(project_id).enqueue(object : Callback<ProjectStoryResponse>{
+            override fun onResponse(
+                call: Call<ProjectStoryResponse>,
+                response: Response<ProjectStoryResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                projectStoryListMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<ProjectStoryResponse>, t: Throwable) {
+                projectStoryListMutableLiveData.postValue(null)
+                Log.i("Project Story List Data: ","GET: " + 500 + " " + t.stackTraceToString())
             }
         })
     }

@@ -1,5 +1,7 @@
 package com.example.scrumpokerapp.utils
 
+import com.example.scrumpokerapp.model.ProjectStory
+import com.example.scrumpokerapp.model.SessionStory
 import com.example.scrumpokerapp.model.User
 import com.example.scrumpokerapp.persistance.UserProfile
 import java.time.Instant
@@ -30,5 +32,19 @@ class ProjectUtils {
         return if (role==1){
             "po"
         } else "user"
+    }
+
+    fun convertProjectStoriesToSessionStories(list: List<ProjectStory>): List<SessionStory>{
+        var sessionStoryList: ArrayList<SessionStory> = arrayListOf()
+        for (item in list){
+            sessionStoryList.add(
+                SessionStory(
+                    item.title,
+                    item.description,
+                    item.doc_id
+                )
+            )
+        }
+        return sessionStoryList
     }
 }
