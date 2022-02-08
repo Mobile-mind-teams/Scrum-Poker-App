@@ -74,11 +74,23 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
         apiController.updateStoryFrom(currentStory.value!!, session_id, "session")
     }
 
+    fun addStoryNote(session_id: String, note: String){
+        currentStory.value?.note = note
+        apiController.updateStoryFrom(currentStory.value!!, session_id, "session")
+    }
+
+    fun agreedStoryValue(session_id: String){
+        currentStory.value?.agreed_status = true
+        currentStory.value?.visibility = true
+        apiController.updateStoryFrom(currentStory.value!!, session_id, "session")
+    }
+
     private fun popStory(storyListToWork: ArrayList<SessionStory>): SessionStory {
         var sessionStory : SessionStory
         if (storyListToWork.size > 0){
             sessionStory = storyListToWork.get(0)
             sessionStory.visibility = true
+            sessionStory.read_status = true
             storyListToWork.removeAt(0)
         } else {
             sessionStory = SessionStory()

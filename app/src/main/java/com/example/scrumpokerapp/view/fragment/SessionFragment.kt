@@ -59,7 +59,7 @@ class SessionFragment(val session_id: String) : Fragment() {
         }
 
         binding.actionSetValue.setOnClickListener {
-            sessionViewModel.updateStoryValue(session_id, 1.0)
+            //control to test actions
         }
 
         sessionViewModel.getSessionData(session_id)
