@@ -58,6 +58,10 @@ class SessionFragment(val session_id: String) : Fragment() {
             )
         }
 
+        binding.actionSetValue.setOnClickListener {
+            sessionViewModel.updateStoryValue(session_id, 1.0)
+        }
+
         sessionViewModel.getSessionData(session_id)
 
         sessionViewModel.getCurrentStorySessionSanpshot(session_id)

@@ -69,6 +69,11 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
         }
     }
 
+    fun updateStoryValue(session_id: String, value: Double){
+        currentStory.value?.weight = value
+        apiController.updateStoryFrom(currentStory.value!!, session_id, "session")
+    }
+
     private fun popStory(storyListToWork: ArrayList<SessionStory>): SessionStory {
         var sessionStory : SessionStory
         if (storyListToWork.size > 0){
