@@ -24,6 +24,8 @@ class HomeViewModel (
     val sesionUpdateData: MutableLiveData<SessionResponse?> = apiController.sessionUpdateMutableLiveData
     val sessionStatusData: MutableLiveData<Boolean> = MutableLiveData()
 
+    var currentSessionID : String = ""
+
     fun getAllUserSessions(uid: String){
         apiController.getAllUserSessions(uid)
     }

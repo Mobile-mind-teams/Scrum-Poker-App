@@ -18,8 +18,8 @@ interface ApiService {
     @GET("sessions/team/{email}")
     fun getAllUserSessionsByEmail(@Path("email") email: String): Call<SessionResponse>
 
-    @GET("sessions/all")
-    fun getAllSessions(): Call<SessionResponse>
+    @GET("sessions/{id}")
+    fun getSessionByID(@Path("id") session_id: String): Call<SessionResponse>
 
     @GET("sessions/all/{id}")
     fun getAllSessionsByPOID(@Path("id") po_id: String): Call<SessionResponse>
@@ -74,4 +74,11 @@ interface ApiService {
 
     @PATCH("sessions/update/{id}")
     fun updateSession(@Body session: Session, @Path("id") session_id : String) : Call<SessionResponse>
+
+    @PATCH("stories/update/{document_id}&{story_id}&{collection}")
+    fun updateStoryFrom(@Body story: SessionStory,
+                        @Path("document_id") document_id : String,
+                        @Path("story_id") story_id : String,
+                        @Path("collection") collection : String,
+    ) : Call<SessionStoriesResponse>
 }

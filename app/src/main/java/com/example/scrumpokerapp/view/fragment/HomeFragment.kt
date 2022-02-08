@@ -110,6 +110,7 @@ class HomeFragment : Fragment(), CustomSessionItemListener {
     }
 
     override fun getSelectedItem(session: Session) {
+        homeViewModel.currentSessionID = session.session_id!!
         homeViewModel.processActionByUserRole(
             session,
             ProjectUtils().isProjectOwner(
@@ -119,6 +120,6 @@ class HomeFragment : Fragment(), CustomSessionItemListener {
 
     fun goToSession(){
         (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(false)
-        (activity as? MainActivity)?.replaceFragment(SessionFragment.newInstance(), "SessionFragment")
+        (activity as? MainActivity)?.replaceFragment(SessionFragment.newInstance(homeViewModel.currentSessionID), "SessionFragment")
     }
 }

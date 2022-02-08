@@ -18,13 +18,13 @@ import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.viewmodel.SessionViewModel
 import com.example.scrumpokerapp.viewmodel.SessionViewModelFactory
 
-class SessionFragment : Fragment() {
+class SessionFragment(val session_id: String) : Fragment() {
 
     private lateinit var sessionViewModel: SessionViewModel
 
     companion object{
-        fun newInstance() : Fragment{
-            return SessionFragment()
+        fun newInstance(session_id: String) : Fragment{
+            return SessionFragment(session_id)
         }
     }
 
@@ -52,26 +52,15 @@ class SessionFragment : Fragment() {
             )
         )
 
-        sessionViewModel.getSessionSnapshot()
-
-        sessionViewModel.getSessionStories("x4mHnBMSGGVKF9FRNCCY")
-
-        var insert = true
-        if (insert){
-            sessionViewModel.setTableCard(
-                UserCard(
-                    (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.uid,
-                    -1.0,
-                    "askForPartition",
-                    false,
-                    "qOhM5TjqxgJ6WsXV6Ove",
-                    "infinito"
-                ),
-                "x4mHnBMSGGVKF9FRNCCY"
+        binding.actionTest.setOnClickListener {
+            sessionViewModel.launchStory(
+                session_id
             )
-
-            insert = false
         }
+
+        sessionViewModel.getSessionData(session_id)
+
+        sessionViewModel.getCurrentStorySessionSanpshot(session_id)
 
         sessionViewModel.deckData.observe(viewLifecycleOwner, Observer {
             if(it != null){
@@ -81,7 +70,7 @@ class SessionFragment : Fragment() {
 
         sessionViewModel.sessionStoryList.observe(viewLifecycleOwner, Observer {
             if(it != null){
-                Log.i("Session Story List: ","session-story: " + it.toText())
+                sessionViewModel.loadSessionStories(it.data)
             }
         })
 
@@ -93,7 +82,30 @@ class SessionFragment : Fragment() {
 
         sessionViewModel.sessionData.observe(viewLifecycleOwner, Observer {
             if (it != null){
-                Log.i("Table Card: ","POST: " + it.toItemCard())
+                sessionViewModel.loadSessionObject(it.data.get(0))
+                sessionViewModel.getSessionStories(
+                    sessionViewModel.sessionObject.session_id.toString()
+                )
+            }
+        })
+
+        sessionViewModel.updateCurrentStoryData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                Log.i("Current Story Data: ","UPDATE: " + it.toText())
+            }
+        })
+
+        sessionViewModel.currentStory.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                Log.i("Current Story Data: ","GET: " + it.transformToJASONtxt())
+            }
+        })
+
+        sessionViewModel.isAllStoryList.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                if (it){
+                    Log.i("Nothing To Show: ","GET STORY LIST " )
+                }
             }
         })
 

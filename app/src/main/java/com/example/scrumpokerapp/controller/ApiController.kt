@@ -21,6 +21,7 @@ class ApiController {
     val userResponseMutableLiveData : MutableLiveData<UsersResponse?>
     val userLoginResponseMutableLiveData : MutableLiveData<UsersResponse?>
     val sessionResponseMutableLiveData : MutableLiveData<SessionResponse?>
+    val currentSessionResponseMutableLiveData : MutableLiveData<SessionResponse?>
     val newSessionResponseMutableLiveData : MutableLiveData<SessionResponse?>
     val backlogStoriesResponseMutableLiveData : MutableLiveData<BacklogStoryResponse?>
     val projectResponseMutableLiveData : MutableLiveData<ProjectResponse?>
@@ -32,6 +33,7 @@ class ApiController {
     val storySessionListMutableLiveData : MutableLiveData<SessionStoriesResponse?>
     val projectStoryListMutableLiveData : MutableLiveData<ProjectStoryResponse?>
     val sessionUpdateMutableLiveData : MutableLiveData<SessionResponse?>
+    val currentStoryMutableLiveData : MutableLiveData<SessionStoriesResponse?>
 
 
     constructor(){
@@ -55,6 +57,8 @@ class ApiController {
         storySessionListMutableLiveData = MutableLiveData()
         projectStoryListMutableLiveData = MutableLiveData()
         sessionUpdateMutableLiveData = MutableLiveData()
+        currentSessionResponseMutableLiveData = MutableLiveData()
+        currentStoryMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -510,6 +514,50 @@ class ApiController {
             override fun onFailure(call: Call<SessionResponse>, t: Throwable) {
                 sessionUpdateMutableLiveData.postValue(null)
                 Log.i("Session Data: ","PATCH: " + 500 + " " + t.stackTrace.toString())
+            }
+        })
+    }
+
+    fun getSessionByID(session_id: String){
+        service.getSessionByID(session_id).enqueue(object : Callback<SessionResponse>{
+            override fun onResponse(
+                call: Call<SessionResponse>,
+                response: Response<SessionResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                currentSessionResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<SessionResponse>, t: Throwable) {
+                currentSessionResponseMutableLiveData.postValue(null)
+                Log.i("Session Data: ","GET: " + 500 + " " + t.stackTrace.toString())
+            }
+        })
+    }
+
+    fun updateStoryFrom(story: SessionStory, document_id: String, collection: String){
+        service.updateStoryFrom(story, document_id, story.doc_id!!, collection).enqueue(object : Callback<SessionStoriesResponse>{
+            override fun onResponse(
+                call: Call<SessionStoriesResponse>,
+                response: Response<SessionStoriesResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data PATCH: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data PATCH: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                currentStoryMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<SessionStoriesResponse>, t: Throwable) {
+                currentStoryMutableLiveData.postValue(null)
+                Log.i("Story Session Data: ","PATCH: " + 500 + " " + t.stackTrace.toString())
             }
         })
     }

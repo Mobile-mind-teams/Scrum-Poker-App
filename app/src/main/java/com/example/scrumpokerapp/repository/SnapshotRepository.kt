@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.scrumpokerapp.model.Session
+import com.example.scrumpokerapp.model.SessionStory
 import com.example.scrumpokerapp.service.DataBaseInstance
 import com.example.scrumpokerapp.service.SnapshotService
 
@@ -14,11 +15,13 @@ class SnapshotRepository: SnapshotService{
     var databaseInstance: DataBaseInstance
     val sessionSnapshotMutableLiveData : MutableLiveData<Session?>
     val userSessionSnapdhotData : MutableLiveData<Session?>
+    val currentStorySnapdhotData : MutableLiveData<SessionStory?>
 
     constructor(){
         databaseInstance = DataBaseInstance().initDataBaseInstance(DATABASE_INSTANCE_TYPE)
         sessionSnapshotMutableLiveData = MutableLiveData()
         userSessionSnapdhotData = MutableLiveData()
+        currentStorySnapdhotData = MutableLiveData()
     }
 
     override fun getFirebaseSessionSnapshot(){
@@ -80,6 +83,43 @@ class SnapshotRepository: SnapshotService{
 
                 } else {
                     userSessionSnapdhotData.postValue(null)
+                    Log.d(ContentValues.TAG, "No such document session")
+                }
+            }
+    }
+
+    override fun getFirebaseCurrentStorySnapshot(session_id: String) {
+        databaseInstance.firestoreInstance.collection("session")
+            .document(session_id)
+            .collection("story")
+            .whereEqualTo("visibility", true)
+            .addSnapshotListener{ snapshot, e ->
+
+                if (e != null) {
+                    Log.w(ContentValues.TAG, "Listen failed.", e)
+                    currentStorySnapdhotData.postValue(null)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    for (doc in snapshot.documents){
+                        Log.d(ContentValues.TAG, "DocumentSnapshot data story-session: ${doc.data}")
+                        currentStorySnapdhotData.postValue(
+                            SessionStory(
+                                doc.data?.get("title").toString(),
+                                doc.data?.get("description").toString(),
+                                doc.data?.get("weight").toString().toDouble(),
+                                doc.data?.get("read_status") as Boolean,
+                                doc.data?.get("agreed_status") as Boolean,
+                                doc.data?.get("visibility") as Boolean,
+                                doc.data?.get("note").toString(),
+                                doc.id,
+                            )
+                        )
+                    }
+
+                } else {
+                    currentStorySnapdhotData.postValue(null)
                     Log.d(ContentValues.TAG, "No such document session")
                 }
             }

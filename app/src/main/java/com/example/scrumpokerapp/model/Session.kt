@@ -70,6 +70,29 @@ class Session {
                 "\n}"
     }
 
+    fun toText(): String {
+        return "Session => {\n" +
+                "project_id: ${project_id},\n" +
+                "project_name: ${project_name},\n" +
+                "admin_id: ${admin_id},\n" +
+                "started_at: ${started_at},\n" +
+                "finished_at: ${finished_at},\n" +
+                "status: ${status},\n" +
+                "session_id: ${session_id},\n" +
+                "note: ${note},\n" +
+                "team: \n [${listToString(teamList)},\n" +
+                "\t]" +
+                "\n}"
+    }
+
+    fun listToString(stringList: List<String>): String{
+        var list = ""
+        for (email in stringList){
+            list = "\n\t\t${email},${list}\t\t"
+        }
+        return if (list.isNotEmpty()) list else ""
+    }
+
     fun toItemCard(): String {
         return "Session => {\n" +
                 "status: ${status},\n" +

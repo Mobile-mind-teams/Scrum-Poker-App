@@ -12,6 +12,7 @@
         tools:context=".view.fragment.SessionFragment">
 
         <TextView
+            android:id="@+id/actionTest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Session Activa"

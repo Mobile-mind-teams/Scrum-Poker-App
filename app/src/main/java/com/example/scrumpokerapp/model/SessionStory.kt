@@ -25,6 +25,27 @@ class SessionStory {
         this.note = ""
     }
 
+    constructor(
+        title: String?,
+        description: String?,
+        weight: Double?,
+        read_status: Boolean?,
+        agreed_status: Boolean?,
+        visibility: Boolean?,
+        note: String?,
+        doc_id: String?
+    ) {
+        this.title = title
+        this.description = description
+        this.weight = weight
+        this.read_status = read_status
+        this.agreed_status = agreed_status
+        this.visibility = visibility
+        this.note = note
+        this.doc_id = doc_id
+    }
+
+
     fun transformToJASONtxt(): String {
         return "\tSessionStory => {\n" +
                 "\ttitle: ${title},\n" +
