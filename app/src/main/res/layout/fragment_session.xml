@@ -11,29 +11,119 @@
         android:layout_height="match_parent"
         tools:context=".view.fragment.SessionFragment">
 
-        <TextView
-            android:id="@+id/actionTest"
+        <include
+            android:id="@+id/currentStoryLayout"
+            layout="@layout/story_list_item"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!--<TextView
+            android:id="@+id/actionLaunchStory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Session Activa"
+            android:text="Lanzar Historia"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintHorizontal_bias="0.813"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.28" />
+            app:layout_constraintVertical_bias="0.087" />
+
+        <TextView
+            android:id="@+id/actionRepeatTurn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Repetir Turno"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.788"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.148" />
+
+        <TextView
+            android:id="@+id/actionGoToBreak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mandar a Break"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.826"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.207" />
 
         <TextView
             android:id="@+id/actionSetValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Set weight"
+            android:text="Asignar Peso"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.501"
+            app:layout_constraintHorizontal_bias="0.792"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.585" />
+            app:layout_constraintVertical_bias="0.261" />
+
+        <TextView
+            android:id="@+id/actionSetNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Agregar Nota a Historia"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.901"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.314" />
+
+        <TextView
+            android:id="@+id/actionFlipCards"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Voltear Cartas"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.788"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.369" />
+
+        <TextView
+            android:id="@+id/actionSetTableCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lanzar carta"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.795"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.431" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.116"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.457">
+
+            <TextView
+                android:id="@+id/tableCards"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cartas"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.596" />
+        </androidx.core.widget.NestedScrollView>-->
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

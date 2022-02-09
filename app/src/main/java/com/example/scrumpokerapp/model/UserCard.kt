@@ -21,6 +21,9 @@ class UserCard {
     @SerializedName("story_id")
     var story_id: String? = null
 
+    @SerializedName("doc_id")
+    var doc_id: String? = null
+
     constructor()
 
     constructor(
@@ -29,7 +32,8 @@ class UserCard {
         action: String?,
         visibility: Boolean?,
         story_id: String?,
-        name: String?
+        name: String?,
+        doc_id: String?
     ) {
         this.user_id = user_id
         this.value = value
@@ -37,6 +41,7 @@ class UserCard {
         this.visibility = visibility
         this.story_id = story_id
         this.name = name
+        this.doc_id = doc_id
     }
 
 

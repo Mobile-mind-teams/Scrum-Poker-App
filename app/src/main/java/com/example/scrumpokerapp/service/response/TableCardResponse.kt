@@ -8,6 +8,19 @@ class TableCardResponse {
     @SerializedName("message") var message : String = ""
     @SerializedName("data") var data : List<UserCard> = listOf()
 
+    constructor()
+
+    constructor(collection: String, message: String, data: List<UserCard>) {
+        this.collection = collection
+        this.message = message
+        this.data = data
+    }
+
+    constructor(collection: String, message: String) {
+        this.collection = collection
+        this.message = message
+    }
+
     fun toText(): String {
         return "TableCardResponse => {\n" +
                 "message: ${message},\n" +

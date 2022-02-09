@@ -81,4 +81,13 @@ interface ApiService {
                         @Path("story_id") story_id : String,
                         @Path("collection") collection : String,
     ) : Call<SessionStoriesResponse>
+
+    @DELETE("table-cards/reset-table/{document_id}&{story_id}")
+    fun clearTable(@Path("document_id") document_id : String,
+                   @Path("story_id") story_id : String) : Call<TableCardResponse>
+
+    @PATCH("table-cards/update/{document_id}&{story_id}")
+    fun updateTableCards(@Body userCard: UserCard,
+                         @Path("document_id") document_id : String,
+                         @Path("story_id") story_id : String) : Call<TableCardResponse>
 }

@@ -10,8 +10,6 @@ import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.repository.SnapshotRepository
 import com.example.scrumpokerapp.service.response.SessionResponse
 import com.example.scrumpokerapp.utils.ProjectUtils
-import com.example.scrumpokerapp.view.activity.MainActivity
-import com.example.scrumpokerapp.view.fragment.SessionFragment
 
 class HomeViewModel (
     val apiController: ApiController,
@@ -19,7 +17,7 @@ class HomeViewModel (
     ) : ViewModel() {
 
     val snapshotRepository: SnapshotRepository = SnapshotRepository()
-    val userSessionData: MutableLiveData<Session?> = snapshotRepository.userSessionSnapdhotData
+    val userSessionData: MutableLiveData<Session?> = snapshotRepository.userSessionSnapshotData
     val sesionListData: MutableLiveData<SessionResponse?> = apiController.sessionResponseMutableLiveData
     val sesionUpdateData: MutableLiveData<SessionResponse?> = apiController.sessionUpdateMutableLiveData
     val sessionStatusData: MutableLiveData<Boolean> = MutableLiveData()

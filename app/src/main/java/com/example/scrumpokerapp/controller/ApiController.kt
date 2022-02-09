@@ -34,6 +34,7 @@ class ApiController {
     val projectStoryListMutableLiveData : MutableLiveData<ProjectStoryResponse?>
     val sessionUpdateMutableLiveData : MutableLiveData<SessionResponse?>
     val currentStoryMutableLiveData : MutableLiveData<SessionStoriesResponse?>
+    val clearTableMutableLiveData : MutableLiveData<TableCardResponse?>
 
 
     constructor(){
@@ -59,6 +60,7 @@ class ApiController {
         sessionUpdateMutableLiveData = MutableLiveData()
         currentSessionResponseMutableLiveData = MutableLiveData()
         currentStoryMutableLiveData = MutableLiveData()
+        clearTableMutableLiveData = MutableLiveData()
     }
 
     fun getUserByIdApi(uid: String){
@@ -227,7 +229,7 @@ class ApiController {
     }
 
     fun addStoriesToSession(
-        storySessionListStory: List<SessionStory>,
+        storySessionList: List<SessionStory>,
         session_id: String
     ){
         var storySessionListResponse: ArrayList<SessionStory?> = arrayListOf()
@@ -235,7 +237,7 @@ class ApiController {
         var message: String = ""
         var isSuccessfulProcess: Boolean = true
         var index = 0
-        for(sessionStory in storySessionListStory){
+        for(sessionStory in storySessionList){
             service.addStoryToSession(sessionStory, session_id, sessionStory.doc_id).enqueue(object : Callback<SessionStoriesResponse>{
                 override fun onResponse(
                     call: Call<SessionStoriesResponse>,
@@ -267,7 +269,7 @@ class ApiController {
                 SessionStoriesResponse(
                     collection,
                     message,
-                    storySessionListStory
+                    storySessionList
                 )
             )
         } else {
@@ -547,7 +549,7 @@ class ApiController {
                 response: Response<SessionStoriesResponse>
             ) {
                 if (response.isSuccessful && response.body() != null){
-                    Log.i("${response.body()?.collection} Data PATCH: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                    Log.i("${response.body()?.collection} Data PATCH: "," ${response.body()?.message} " + 200 + " " + response.body()?.toText())
                 } else {
                     Log.i("${response.body()?.collection} Data PATCH: ", "${response.body()?.message} " + 200 + " Not Found!")
                 }
@@ -560,6 +562,75 @@ class ApiController {
                 Log.i("Story Session Data: ","PATCH: " + 500 + " " + t.stackTrace.toString())
             }
         })
+    }
+
+    fun clearTable(sessionId: String, story_id: String) {
+        service.clearTable(sessionId, story_id).enqueue(object : Callback<TableCardResponse>{
+            override fun onResponse(
+                call: Call<TableCardResponse>,
+                response: Response<TableCardResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data DELETE: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data DELETE: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                clearTableMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<TableCardResponse>, t: Throwable) {
+                clearTableMutableLiveData.postValue(null)
+                Log.i("Table Card Data: ","DELETE: " + 500 + " " + t.stackTrace.toString())
+            }
+        })
+    }
+
+    fun flipCards(session_id: String, tableCards: List<UserCard>) {
+        var tableCardsListResponse: ArrayList<UserCard> = arrayListOf()
+        var collection: String = ""
+        var message: String = ""
+        var isSuccessfulProcess: Boolean = true
+        var index = 0
+        for(card in tableCards){
+            card.visibility = true
+            service.updateTableCards(card, session_id, card.doc_id!!).enqueue(object : Callback<TableCardResponse>{
+                override fun onResponse(
+                    call: Call<TableCardResponse>,
+                    response: Response<TableCardResponse>
+                ) {
+                    if (response.isSuccessful && response.body() != null){
+                        Log.i("${response.body()?.collection} Data PATCH: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                    } else {
+                        Log.i("${response.body()?.collection} Data PATCH: ", "${response.body()?.message} " + 200 + " Not Found!")
+                    }
+
+                    if (collection == "" && message == ""){
+                        collection = response.body()?.collection.toString()
+                        message = response.body()?.message.toString()
+                    }
+
+                    tableCardsListResponse.add(response.body()?.data?.get(index)!!)
+                }
+
+                override fun onFailure(call: Call<TableCardResponse>, t: Throwable) {
+                    isSuccessfulProcess = false
+                    Log.i("Table Card Data: ","PATCH: " + 500 + " " + t.stackTraceToString())
+                }
+            })
+        }
+
+        if (isSuccessfulProcess){
+            tableCardResponseMutableLiveData.postValue(
+                TableCardResponse(
+                    collection,
+                    message,
+                    tableCardsListResponse
+                )
+            )
+        } else {
+            tableCardResponseMutableLiveData.postValue(null)
+        }
     }
 
 }

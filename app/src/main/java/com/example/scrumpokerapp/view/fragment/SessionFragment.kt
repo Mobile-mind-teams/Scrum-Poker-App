@@ -46,73 +46,165 @@ class SessionFragment(val session_id: String) : Fragment() {
             SessionViewModelFactory(ApiController())
         )[SessionViewModel::class.java]
 
+        if (ProjectUtils().isProjectOwner(
+                (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.role
+        )){
+            //Para PO
+            //Carga de objeto de sesion
+            sessionViewModel.getSessionData(session_id)
+
+            //Observer de carga de sesion
+            sessionViewModel.sessionData.observe(viewLifecycleOwner, Observer {
+                if (it != null){
+                    sessionViewModel.loadSessionObject(it.data.get(0))
+                    sessionViewModel.getSessionStories(
+                        session_id
+                    )
+                }
+            })
+
+            //Observer de carga de historias a trabajar
+            sessionViewModel.sessionStoryList.observe(viewLifecycleOwner, Observer {
+                if(it != null){
+                    sessionViewModel.loadSessionStories(it.data)
+                }
+            })
+
+            sessionViewModel.isAllStoryList.observe(viewLifecycleOwner, Observer {
+                if (it != null){
+                    Log.i("Story List: ","FINISHED: ")
+                    sessionViewModel.loadEndoOfListItem(binding.currentStoryLayout)
+                    sessionViewModel.getSessionStories(session_id)
+                }
+            })
+        }
+
+        //Para todos
+        //Observer de la historia lanzada en snapshot
+        sessionViewModel.currentStory.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                Log.i("Current Story Data: ","SNAPSHOT: " + it.transformToJASONtxt())
+                if(it.agreed_status == true){
+                    sessionViewModel.clearTable(session_id, it.doc_id.toString())
+                    sessionViewModel.getClearPokerTableSnapshot(session_id)
+                } else {
+                    sessionViewModel.loadStoryItem(binding.currentStoryLayout, it)
+                    sessionViewModel.getPokerTableSnapshot(session_id, it.doc_id.toString())
+                }
+            }
+        })
+
+        //Cargar snapshot de la historia activa
+        sessionViewModel.getCurrentStorySessionSanpshot(session_id)
+
+        //Cargar snapshot de la sesion activa
+        sessionViewModel.getSessionSnapshot(session_id)
+
+        sessionViewModel.sessionSnapshotData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                if (it.status == "onBreak"){
+                    sessionViewModel.clearTable(session_id, sessionViewModel.currentStory.value?.doc_id!!)
+                    goToHome()
+                } else if (it.status == "finishAllStories") {
+
+                } else if (it.status == "finished"){
+
+                }
+            }
+        })
+
+        //Observer de la mesa
+        sessionViewModel.tableData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                sessionViewModel.loadTableCards(it.data)
+                //Recargar adapter de cartas en mesa
+//                binding.tableCards.setText(it.toText())
+            }
+        })
+
+        sessionViewModel.clearTableData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                if (it.message == "Deleted!" && sessionViewModel.currentStory.value?.agreed_status == false){
+                } else if ((it.message == "Deleted!" && sessionViewModel.currentStory.value?.agreed_status == true)){
+                    sessionViewModel.launchStory(session_id, sessionViewModel.currentStory.value)
+                }
+                //Vaciar adapter de cartas en mesa
+//                binding.tableCards.setText("Vacio")
+            } else {
+                Log.i("Poker Table snapshot: ","it: NULL")
+            }
+        })
+
+        //observer de la accion seleccionada
+        sessionViewModel.tableCardSent.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                Log.i("Table Card: ","POST CURRENT USER: " + it.toText())
+            }
+        })
+
+        //Carga de controles
         sessionViewModel.getDeckByUserRole(
             ProjectUtils().getRoleAsString(
                 (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.role
             )
         )
 
-        binding.actionTest.setOnClickListener {
-            sessionViewModel.launchStory(
-                session_id
-            )
-        }
-
-        binding.actionSetValue.setOnClickListener {
-            //control to test actions
-        }
-
-        sessionViewModel.getSessionData(session_id)
-
-        sessionViewModel.getCurrentStorySessionSanpshot(session_id)
-
+        //Observer de controles
         sessionViewModel.deckData.observe(viewLifecycleOwner, Observer {
             if(it != null){
+                //Cargar adapter de controles
                 Log.i("Deck List: ","Cards: " + it.toText())
             }
         })
 
-        sessionViewModel.sessionStoryList.observe(viewLifecycleOwner, Observer {
-            if(it != null){
-                sessionViewModel.loadSessionStories(it.data)
-            }
-        })
+        //Acciones de controles
+        /*binding.actionSetTableCard.setOnClickListener {
+            sessionViewModel.setTableCard(
+                UserCard(
+                    "user_id",
+                    2.0,
+                    "action",
+                    false,
+                    sessionViewModel.currentStory.value?.doc_id,
+                    "name",
+                    ""
+                ),
+                session_id
+            )
+        }
 
-        sessionViewModel.tableCardSent.observe(viewLifecycleOwner, Observer {
-            if(it != null){
-                Log.i("Table Card: ","POST: " + it.toText())
-            }
-        })
+        binding.actionLaunchStory.setOnClickListener {
+            sessionViewModel.launchStory(
+                session_id,
+                sessionViewModel.currentStory.value
+            )
+        }
 
-        sessionViewModel.sessionData.observe(viewLifecycleOwner, Observer {
-            if (it != null){
-                sessionViewModel.loadSessionObject(it.data.get(0))
-                sessionViewModel.getSessionStories(
-                    sessionViewModel.sessionObject.session_id.toString()
-                )
-            }
-        })
+        binding.actionSetValue.setOnClickListener {
+            sessionViewModel.updateStoryValue(session_id, 5.0)
+        }
 
-        sessionViewModel.updateCurrentStoryData.observe(viewLifecycleOwner, Observer {
-            if(it != null){
-                Log.i("Current Story Data: ","UPDATE: " + it.toText())
-            }
-        })
+        binding.actionRepeatTurn.setOnClickListener {
+            sessionViewModel.repeatTurn(session_id, sessionViewModel.currentStory.value?.doc_id!!)
+        }
 
-        sessionViewModel.currentStory.observe(viewLifecycleOwner, Observer {
-            if (it != null){
-                Log.i("Current Story Data: ","GET: " + it.transformToJASONtxt())
-            }
-        })
+        binding.actionGoToBreak.setOnClickListener {
+            sessionViewModel.goToBreak(sessionViewModel.sessionObject)
+        }
 
-        sessionViewModel.isAllStoryList.observe(viewLifecycleOwner, Observer {
-            if (it != null){
-                if (it){
-                    Log.i("Nothing To Show: ","GET STORY LIST " )
-                }
-            }
-        })
+        binding.actionSetNote.setOnClickListener {
+            sessionViewModel.addStoryNote(session_id,binding.actionSetNote.text.toString())
+        }
+
+        binding.actionFlipCards.setOnClickListener {
+            sessionViewModel.flipCards(session_id, sessionViewModel.cardsOnTable)
+        }*/
 
         return binding.root
+    }
+
+    private fun goToHome() {
+        (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(true)
+        (activity as? MainActivity)?.replaceFragment(HomeFragment.newInstance(), "HomeFragment")
     }
 }

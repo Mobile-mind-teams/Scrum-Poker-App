@@ -5,8 +5,10 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.model.SessionStory
+import com.example.scrumpokerapp.model.UserCard
 import com.example.scrumpokerapp.service.DataBaseInstance
 import com.example.scrumpokerapp.service.SnapshotService
+import com.example.scrumpokerapp.service.response.TableCardResponse
 
 const val DATABASE_INSTANCE_TYPE = "Firestore"
 
@@ -14,19 +16,23 @@ class SnapshotRepository: SnapshotService{
 
     var databaseInstance: DataBaseInstance
     val sessionSnapshotMutableLiveData : MutableLiveData<Session?>
-    val userSessionSnapdhotData : MutableLiveData<Session?>
-    val currentStorySnapdhotData : MutableLiveData<SessionStory?>
+    val userSessionSnapshotData : MutableLiveData<Session?>
+    val currentStorySnapshotData : MutableLiveData<SessionStory?>
+    val pokerTableSnapshotData : MutableLiveData<TableCardResponse?>
+    val clearPokerTableSnapshotData : MutableLiveData<TableCardResponse?>
 
     constructor(){
         databaseInstance = DataBaseInstance().initDataBaseInstance(DATABASE_INSTANCE_TYPE)
         sessionSnapshotMutableLiveData = MutableLiveData()
-        userSessionSnapdhotData = MutableLiveData()
-        currentStorySnapdhotData = MutableLiveData()
+        userSessionSnapshotData = MutableLiveData()
+        currentStorySnapshotData = MutableLiveData()
+        pokerTableSnapshotData = MutableLiveData()
+        clearPokerTableSnapshotData = MutableLiveData()
     }
 
-    override fun getFirebaseSessionSnapshot(){
+    override fun getFirebaseSessionSnapshot(session_id: String){
         databaseInstance.firestoreInstance.collection("session")
-            .whereEqualTo("status","finished")
+            .whereEqualTo("session_id",session_id)
             .limit(1)
             .addSnapshotListener{ snapshot, e ->
 
@@ -63,14 +69,14 @@ class SnapshotRepository: SnapshotService{
 
                 if (e != null) {
                     Log.w(ContentValues.TAG, "Listen failed.", e)
-                    userSessionSnapdhotData.postValue(null)
+                    userSessionSnapshotData.postValue(null)
                     return@addSnapshotListener
                 }
 
                 if (snapshot != null && !snapshot.isEmpty) {
                     for (doc in snapshot.documents){
                         Log.d(ContentValues.TAG, "DocumentSnapshot data session: ${doc.data}")
-                        userSessionSnapdhotData.postValue(
+                        userSessionSnapshotData.postValue(
                             Session(
                                 doc.data?.get("project_name").toString(),
                                 doc.data?.get("project_id").toString(),
@@ -82,7 +88,7 @@ class SnapshotRepository: SnapshotService{
                     }
 
                 } else {
-                    userSessionSnapdhotData.postValue(null)
+                    userSessionSnapshotData.postValue(null)
                     Log.d(ContentValues.TAG, "No such document session")
                 }
             }
@@ -97,14 +103,14 @@ class SnapshotRepository: SnapshotService{
 
                 if (e != null) {
                     Log.w(ContentValues.TAG, "Listen failed.", e)
-                    currentStorySnapdhotData.postValue(null)
+                    currentStorySnapshotData.postValue(null)
                     return@addSnapshotListener
                 }
 
                 if (snapshot != null && !snapshot.isEmpty) {
                     for (doc in snapshot.documents){
                         Log.d(ContentValues.TAG, "DocumentSnapshot data story-session: ${doc.data}")
-                        currentStorySnapdhotData.postValue(
+                        currentStorySnapshotData.postValue(
                             SessionStory(
                                 doc.data?.get("title").toString(),
                                 doc.data?.get("description").toString(),
@@ -119,8 +125,91 @@ class SnapshotRepository: SnapshotService{
                     }
 
                 } else {
-                    currentStorySnapdhotData.postValue(null)
-                    Log.d(ContentValues.TAG, "No such document session")
+                    currentStorySnapshotData.postValue(null)
+                    Log.d(ContentValues.TAG, "No such document story visibility true")
+                }
+            }
+    }
+
+    override fun getFirebasePokerTableSnapshot(session_id: String, story_id: String) {
+        databaseInstance.firestoreInstance.collection("session")
+            .document(session_id)
+            .collection("table-card")
+            .whereEqualTo("story_id",story_id)
+            .addSnapshotListener{ snapshot, e ->
+
+                if (e != null) {
+                    Log.w(ContentValues.TAG, "Listen failed.", e)
+                    pokerTableSnapshotData.postValue(null)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    var cardsOnTable : ArrayList<UserCard> = arrayListOf()
+                    for (doc in snapshot.documents){
+                        Log.d(ContentValues.TAG, "DocumentSnapshot data table-card: ${doc.data}")
+                        var card = UserCard(
+                            doc.data?.get("user_id").toString(),
+                            doc.data?.get("value").toString().toDouble(),
+                            doc.data?.get("action").toString(),
+                            doc.data?.get("visibility") as Boolean,
+                            doc.data?.get("story_id").toString(),
+                            doc.data?.get("name").toString(),
+                            doc.id
+                        )
+                        cardsOnTable.add(card)
+                    }
+
+                    pokerTableSnapshotData.postValue(
+                        TableCardResponse(
+                            "session",
+                            "Success!",
+                            cardsOnTable
+                        )
+                    )
+
+                } else {
+                    pokerTableSnapshotData.postValue(null)
+                    clearPokerTableSnapshotData.postValue(
+                        TableCardResponse(
+                            "session",
+                            "Deleted!"
+                        )
+                    )
+                    Log.d(ContentValues.TAG, "Cards Deleted")
+                    Log.d(ContentValues.TAG, "No such document table-card")
+                }
+            }
+    }
+
+    override fun getFirebaseClearPokerTableSnapshot(session_id: String) {
+        var isSuccess = true
+        databaseInstance.firestoreInstance.collection("session")
+            .document(session_id)
+            .collection("table-card")
+            .addSnapshotListener{ snapshot, e ->
+
+                if (e != null) {
+                    Log.w(ContentValues.TAG, "Listen failed.", e)
+                    clearPokerTableSnapshotData.postValue(null)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    Log.d(ContentValues.TAG, "Not Empty Jet Deleted")
+                    clearPokerTableSnapshotData.postValue(null)
+                    isSuccess = false
+                }
+            }.let {
+                Log.d(ContentValues.TAG, "it: " + it.toString())
+                if (isSuccess){
+                    clearPokerTableSnapshotData.postValue(
+                        TableCardResponse(
+                            "session",
+                            "Deleted!"
+                        )
+                    )
+                    Log.d(ContentValues.TAG, "Deleted")
                 }
             }
     }
