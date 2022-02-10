@@ -4,7 +4,8 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-const val BASE_URL = "http://192.168.3.7:5000/scrum-poker/v1/"
+//const val BASE_URL = "http://192.168.3.7:5000/scrum-poker/v1/"
+const val BASE_URL = "https://mx-arkusnexus-scrum-poker-api.herokuapp.com/"
 
 class ApiClient {
     fun initRetrofit() = Retrofit.Builder()
