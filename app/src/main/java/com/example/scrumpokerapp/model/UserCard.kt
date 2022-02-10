@@ -44,6 +44,22 @@ class UserCard {
         this.doc_id = doc_id
     }
 
+    constructor(
+        name: String?,
+        user_id: String?,
+        value: Double?,
+        action: String?,
+        visibility: Boolean?,
+        story_id: String?
+    ) {
+        this.name = name
+        this.user_id = user_id
+        this.value = value
+        this.action = action
+        this.visibility = visibility
+        this.story_id = story_id
+    }
+
 
     fun transformToJASONtxt(): String {
         return "UserCard => {\n" +

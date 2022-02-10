@@ -50,19 +50,24 @@ class HomeViewModel (
     }
 
     fun processActionByUserRole(session: Session, isProjectOwner: Boolean) {
-        if (isProjectOwner && !validateSessionStatus(session)
-        ){
-            updateSessionStatus(session)
-        } else if (!isProjectOwner && !validateSessionStatus(session)){
-            Toast.makeText(application,"Aun no empieza la Sesion!", Toast.LENGTH_SHORT).show()
-            sessionStatusData.postValue(false)
-        } else if (validateSessionStatus(session)){
-            sessionStatusData.postValue(true)
+        when(session.status){
+            "onBreak" -> {
+                if(isProjectOwner){
+                    updateSessionStatus(session)
+                } else {
+                    sessionStatusData.postValue(false)
+                    Toast.makeText(application,"Seguimos en Break!", Toast.LENGTH_SHORT).show()
+                }
+            }
+            "finished" -> {
+                sessionStatusData.postValue(false)
+                Toast.makeText(application,"La sesion ha terminado", Toast.LENGTH_SHORT).show()
+            }
+            "inProgress" -> {
+                sessionStatusData.postValue(true)
+                Toast.makeText(application,"Has entrado a la sesion", Toast.LENGTH_SHORT).show()
+            }
         }
-    }
-
-    private fun validateSessionStatus(session: Session): Boolean {
-        return session.status == "inProgress"
     }
 
     fun loadUserSessionSnapshot(email: String){

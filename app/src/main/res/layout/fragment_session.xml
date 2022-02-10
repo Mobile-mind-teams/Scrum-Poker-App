@@ -18,7 +18,87 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!--<TextView
+        <!--cartas en mesa-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_margin="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/controlRecycler"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/currentStoryLayout">
+
+            <View
+                android:id="@+id/topSpace"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/cardRecycler"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/cardRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@id/bottomSpace"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@+id/topSpace"/>
+
+            <View
+                android:id="@+id/bottomSpace"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!--controles-->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/controlRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:orientation="horizontal"/>
+
+        <!-- Vista Dise;o controles
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/controlRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:orientation="horizontal"
+            tools:listitem="@layout/scrum_session_card_item"
+            tools:itemCount="4"
+            tools:orientation="horizontal" />-->
+
+        <!-- Vista dise;o Cartas en mesa
+        <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/cardRecycler"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toTopOf="@id/bottomSpace"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="horizontal"
+                tools:listitem="@layout/scrum_session_card_item"
+                tools:itemCount="4"
+                tools:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@+id/topSpace" />
+        -->
+
+        <!--
+        <TextView
             android:id="@+id/actionLaunchStory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

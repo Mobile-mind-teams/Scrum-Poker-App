@@ -10,4 +10,6 @@ interface SnapshotService {
     fun getFirebasePokerTableSnapshot(session_id: String, story_id: String)
 
     fun getFirebaseClearPokerTableSnapshot(session_id: String)
+
+    fun getFirebaseCurrentCardSentSnapshot(session_id: String, user_id: String)
 }

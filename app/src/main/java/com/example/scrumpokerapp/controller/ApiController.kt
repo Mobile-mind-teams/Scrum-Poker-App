@@ -633,4 +633,26 @@ class ApiController {
         }
     }
 
+    fun updateTableCard(session_id: String, userCard: UserCard) {
+        service.updateTableCards(userCard, session_id, userCard.doc_id!!).enqueue(object : Callback<TableCardResponse>{
+            override fun onResponse(
+                call: Call<TableCardResponse>,
+                response: Response<TableCardResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data PATCH: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data PATCH: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                tableCardResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<TableCardResponse>, t: Throwable) {
+                tableCardResponseMutableLiveData.postValue(null)
+                Log.i("Table Card Data: ","PATCH: " + 500 + " " + t.stackTraceToString())
+            }
+        })
+    }
+
 }

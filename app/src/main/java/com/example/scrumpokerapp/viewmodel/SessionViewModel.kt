@@ -8,11 +8,13 @@ import com.example.scrumpokerapp.databinding.StoryListItemBinding
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.model.SessionStory
 import com.example.scrumpokerapp.model.UserCard
+import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.repository.SnapshotRepository
 import com.example.scrumpokerapp.service.response.CardsResponse
 import com.example.scrumpokerapp.service.response.SessionResponse
 import com.example.scrumpokerapp.service.response.SessionStoriesResponse
 import com.example.scrumpokerapp.service.response.TableCardResponse
+import com.example.scrumpokerapp.utils.ProjectUtils
 
 class SessionViewModel(val apiController: ApiController) : ViewModel() {
 
@@ -26,7 +28,10 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
     val sessionSnapshotData : MutableLiveData<Session?> = snapshotRepository.sessionSnapshotMutableLiveData
     val tableData : MutableLiveData<TableCardResponse?> = snapshotRepository.pokerTableSnapshotData
     val clearTableData : MutableLiveData<TableCardResponse?> = snapshotRepository.clearPokerTableSnapshotData
+    val userCardInfo : MutableLiveData<UserCard?> = MutableLiveData()
+    val currentCardSent : MutableLiveData<UserCard?> = snapshotRepository.currentCardSentSnapshotData
 
+    lateinit var currentUser : UserProfile
     lateinit var sessionObject : Session
     var storyListToWork : ArrayList<SessionStory> = arrayListOf()
     var cardsOnTable : ArrayList<UserCard> = arrayListOf()
@@ -40,7 +45,16 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
     }
 
     fun setTableCard(card: UserCard, session_id: String){
-        apiController.setTableCard(card,session_id)
+        if (validaUserCard()){
+            card.doc_id = currentCardSent.value?.doc_id
+            apiController.updateTableCard(session_id, card)
+        } else {
+            apiController.setTableCard(card,session_id)
+        }
+    }
+
+    private fun validaUserCard(): Boolean {
+        return currentCardSent.value != null
     }
 
     fun getSessionSnapshot(session_id: String){
@@ -59,8 +73,16 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
         snapshotRepository.getFirebaseClearPokerTableSnapshot(session_id)
     }
 
+    fun getCurrentCardSentData(session_id: String){
+        snapshotRepository.getFirebaseCurrentCardSentSnapshot(session_id, currentUser.uid!!)
+    }
+
     fun getSessionData(session_id: String){
         apiController.getSessionByID(session_id)
+    }
+
+    fun loadUserProfileObject(user: UserProfile) {
+        this.currentUser = user
     }
 
     fun loadSessionObject(session: Session){
@@ -97,6 +119,8 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
     fun updateStoryValue(session_id: String, value: Double){
         currentStory.value?.weight = value
         currentStory.value?.agreed_status = true
+        currentStory.value?.visibility = false
+        popStory(storyListToWork)
         apiController.updateStoryFrom(currentStory.value!!, session_id, "session")
     }
 
@@ -131,12 +155,6 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
         clearTable(session_id, story_id)
     }
 
-    fun nextTurn(session_id: String, value: Double) {
-        currentStory.value?.agreed_status = true
-        currentStory.value?.weight = value
-        apiController.updateStoryFrom(currentStory.value!!, session_id, "session")
-    }
-
     fun loadTableCards(cards: List<UserCard>) {
         cardsOnTable.clear()
         for(card in cards){
@@ -144,8 +162,9 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
         }
     }
 
-    fun finishSession(sessionId: String) {
-        Log.i("Nothing To Show: ","FINISH SESSION ")
+    fun finishSession(session: Session) {
+        session.status = "finished"
+        apiController.updateSession(session)
     }
 
     fun loadEndoOfListItem(currentStoryLayout: StoryListItemBinding) {
@@ -158,6 +177,34 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
         currentStoryLayout.storyTitle.setText(sessionStory.title)
         currentStoryLayout.storyDescription.setText(sessionStory.description)
         currentStoryLayout.storyWeight.setText(sessionStory.weight.toString())
+    }
+
+    fun executeAction(userCard: UserCard, isProjectOwner: Boolean, isTableCard: Boolean) {
+        if (isProjectOwner && isTableCard){
+            when(userCard.action){
+                "setWeight" -> updateStoryValue(sessionObject.session_id!!, userCard.value!!)
+                "goToBreak" -> goToBreak(sessionObject)
+                "addNote" -> addStoryNote(sessionObject.session_id!!, "Nota escrita por usuario")
+            }
+        } else if (!isProjectOwner && isTableCard){
+            if (userCard.user_id == currentUser.uid){
+                showCardInfo(userCard)
+            } else {
+                userCardInfo.postValue(null)
+            }
+        } else {
+            when(userCard.action){
+                "launchStory" -> launchStory(sessionObject.session_id!!, currentStory.value)
+                "repeatTurn" -> repeatTurn(sessionObject.session_id!!, currentStory.value?.doc_id!!)
+                "flipCards" -> flipCards(sessionObject.session_id!!, cardsOnTable)
+                "finishSession" -> finishSession(sessionObject)
+                else -> setTableCard(userCard, sessionObject.session_id!!)
+            }
+        }
+    }
+
+    private fun showCardInfo(userCard: UserCard) {
+        userCardInfo.postValue(userCard)
     }
 
 }

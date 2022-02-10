@@ -20,6 +20,7 @@ class SnapshotRepository: SnapshotService{
     val currentStorySnapshotData : MutableLiveData<SessionStory?>
     val pokerTableSnapshotData : MutableLiveData<TableCardResponse?>
     val clearPokerTableSnapshotData : MutableLiveData<TableCardResponse?>
+    val currentCardSentSnapshotData : MutableLiveData<UserCard?>
 
     constructor(){
         databaseInstance = DataBaseInstance().initDataBaseInstance(DATABASE_INSTANCE_TYPE)
@@ -28,6 +29,7 @@ class SnapshotRepository: SnapshotService{
         currentStorySnapshotData = MutableLiveData()
         pokerTableSnapshotData = MutableLiveData()
         clearPokerTableSnapshotData = MutableLiveData()
+        currentCardSentSnapshotData = MutableLiveData()
     }
 
     override fun getFirebaseSessionSnapshot(session_id: String){
@@ -210,6 +212,42 @@ class SnapshotRepository: SnapshotService{
                         )
                     )
                     Log.d(ContentValues.TAG, "Deleted")
+                }
+            }
+    }
+
+    override fun getFirebaseCurrentCardSentSnapshot(session_id: String, user_id: String) {
+        databaseInstance.firestoreInstance.collection("session")
+            .document(session_id)
+            .collection("table-card")
+            .whereEqualTo("user_id", user_id)
+            .addSnapshotListener{ snapshot, e ->
+
+                if (e != null) {
+                    Log.w(ContentValues.TAG, "Listen failed.", e)
+                    currentCardSentSnapshotData.postValue(null)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    for (doc in snapshot.documents){
+                        Log.d(ContentValues.TAG, "DocumentSnapshot data table-card: ${doc.data}")
+                        currentCardSentSnapshotData.postValue(
+                            UserCard(
+                                doc.data?.get("user_id").toString(),
+                                doc.data?.get("value").toString().toDouble(),
+                                doc.data?.get("action").toString(),
+                                doc.data?.get("visibility") as Boolean,
+                                doc.data?.get("story_id").toString(),
+                                doc.data?.get("name").toString(),
+                                doc.id,
+                            )
+                        )
+                    }
+
+                } else {
+                    currentCardSentSnapshotData.postValue(null)
+                    Log.d(ContentValues.TAG, "No such document table-card")
                 }
             }
     }

@@ -1,9 +1,8 @@
 package com.example.scrumpokerapp.utils
 
-import com.example.scrumpokerapp.model.ProjectStory
-import com.example.scrumpokerapp.model.SessionStory
-import com.example.scrumpokerapp.model.User
+import com.example.scrumpokerapp.model.*
 import com.example.scrumpokerapp.persistance.UserProfile
+import com.google.gson.annotations.SerializedName
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -46,5 +45,26 @@ class ProjectUtils {
             )
         }
         return sessionStoryList
+    }
+
+    fun isTableCard(type: String): Boolean {
+        return type == "tableCard"
+    }
+
+    fun convertCardListToUserCardList(cardList: List<Card>, user_id: String): List<UserCard> {
+        var userCardList : ArrayList<UserCard> = arrayListOf()
+        for (card in cardList){
+            userCardList.add(
+                UserCard(
+                    card.name,
+                    user_id,
+                    card.value,
+                    card.action,
+                    false,
+                    ""
+                )
+            )
+        }
+        return userCardList
     }
 }
