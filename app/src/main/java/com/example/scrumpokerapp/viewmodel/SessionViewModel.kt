@@ -28,6 +28,8 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
     val backlogSnapshotData: MutableLiveData<Backlog?> = snapshotRepository.backlogCreatedSnapshotData
     val backlogStoryListData: MutableLiveData<BacklogStoryResponse?> = apiController.backlogStoriesResponseMutableLiveData
     val projectUpdateMutableLiveData : MutableLiveData<ProjectResponse?> = apiController.projectUpdateResponseMutableLiveData
+    val adminUpdateMutableLiveData : MutableLiveData<UsersResponse?> = apiController.adminResponseMutableLiveData
+    val userUpdateMutableLiveData : MutableLiveData<UsersResponse?> = apiController.userUpdateResponseMutableLiveData
 
     lateinit var currentUser : UserProfile
     lateinit var sessionObject : Session
@@ -254,4 +256,30 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
         return if (areAllSessionStoriesWithWeightValue) "complete" else "incomplete"
     }
 
+    fun updateAdminStatus(userProfile: UserProfile?){
+        apiController.updateUser(
+            User(
+                userProfile?.email!!,
+                "available"
+            ),
+            userProfile.doc_id.toString(),
+            userProfile.role
+        )
+    }
+
+    fun updateUserStatus(userProfile: UserProfile?){
+        apiController.updateUser(
+            User(
+                userProfile?.email!!,
+                "available"
+            ),
+            userProfile.doc_id.toString(),
+            userProfile.role
+        )
+    }
+
+    fun updateUserProfile(userProfile: UserProfile?) : UserProfile{
+        userProfile?.status = "available"
+        return userProfile!!
+    }
 }

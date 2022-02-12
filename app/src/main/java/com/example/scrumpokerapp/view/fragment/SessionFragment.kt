@@ -140,9 +140,22 @@ class SessionFragment(val session_id: String) : Fragment(), CustomCardItemListen
 
             sessionViewModel.projectUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
                 if (it != null) {
-                    Toast.makeText(context,"Historias Agregadas a Backlog!", Toast.LENGTH_SHORT).show()
+                    sessionViewModel.updateAdminStatus(sessionViewModel.currentUser)
+                } else {
+                    //Capturar error de actualizacion de proyecto
+                    binding.progressBar.visibility = View.INVISIBLE
+                }
+            })
 
-                    Toast.makeText(context,"Estados Actualizados!", Toast.LENGTH_SHORT).show()
+            sessionViewModel.adminUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
+                if(it != null){
+                    (activity as? MainActivity)?.mainActivityViewModel?.userData?.postValue(
+                        sessionViewModel.updateUserProfile(
+                            (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
+                        )
+                    )
+
+                    Toast.makeText(context,"Historias Agregadas a Backlog!", Toast.LENGTH_SHORT).show()
 
                     Toast.makeText(context,"Backlog Creado!", Toast.LENGTH_SHORT).show()
 
@@ -193,9 +206,14 @@ class SessionFragment(val session_id: String) : Fragment(), CustomCardItemListen
 
         sessionViewModel.sessionSnapshotData.observe(viewLifecycleOwner, Observer {
             if (it != null){
-                if (it.status == "onBreak" || (it.status == "finished" && !ProjectUtils().isProjectOwner(sessionViewModel.currentUser.role))){
+                if (it.status == "onBreak"){
                     goToHome()
-                } else if (it.status == "finished" && ProjectUtils().isProjectOwner(sessionViewModel.currentUser.role)) {
+                } else if (it.status == "finished" && !ProjectUtils().isProjectOwner(sessionViewModel.currentUser.role)){
+                    sessionViewModel.updateUserStatus(
+                        sessionViewModel.currentUser
+                    )
+                }
+                else if (it.status == "finished" && ProjectUtils().isProjectOwner(sessionViewModel.currentUser.role)) {
                     binding.progressBar.visibility = View.VISIBLE
                     sessionViewModel.getStoriesForBacklog(session_id)
                 }
@@ -260,6 +278,20 @@ class SessionFragment(val session_id: String) : Fragment(), CustomCardItemListen
                 Toast.makeText(context,"Mandaste: " + it.name + " Accion: " + it.action, Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(context,"Esa no es tu carta: ", Toast.LENGTH_SHORT).show()
+            }
+        })
+
+        sessionViewModel.userUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
+            if(it != null){
+                (activity as? MainActivity)?.mainActivityViewModel?.userData?.postValue(
+                    sessionViewModel.updateUserProfile(
+                        (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
+                    )
+                )
+                goToHome()
+            } else {
+                //Capturar error de actualizacion de proyecto
+                binding.progressBar.visibility = View.INVISIBLE
             }
         })
 
