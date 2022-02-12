@@ -3,11 +3,13 @@ package com.example.scrumpokerapp.repository
 import android.content.ContentValues
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import com.example.scrumpokerapp.model.Backlog
 import com.example.scrumpokerapp.model.Session
 import com.example.scrumpokerapp.model.SessionStory
 import com.example.scrumpokerapp.model.UserCard
 import com.example.scrumpokerapp.service.DataBaseInstance
 import com.example.scrumpokerapp.service.SnapshotService
+import com.example.scrumpokerapp.service.response.BacklogResponse
 import com.example.scrumpokerapp.service.response.TableCardResponse
 
 const val DATABASE_INSTANCE_TYPE = "Firestore"
@@ -21,6 +23,7 @@ class SnapshotRepository: SnapshotService{
     val pokerTableSnapshotData : MutableLiveData<TableCardResponse?>
     val clearPokerTableSnapshotData : MutableLiveData<TableCardResponse?>
     val currentCardSentSnapshotData : MutableLiveData<UserCard?>
+    val backlogCreatedSnapshotData : MutableLiveData<Backlog?>
 
     constructor(){
         databaseInstance = DataBaseInstance().initDataBaseInstance(DATABASE_INSTANCE_TYPE)
@@ -30,6 +33,7 @@ class SnapshotRepository: SnapshotService{
         pokerTableSnapshotData = MutableLiveData()
         clearPokerTableSnapshotData = MutableLiveData()
         currentCardSentSnapshotData = MutableLiveData()
+        backlogCreatedSnapshotData = MutableLiveData()
     }
 
     override fun getFirebaseSessionSnapshot(session_id: String){
@@ -248,6 +252,41 @@ class SnapshotRepository: SnapshotService{
                 } else {
                     currentCardSentSnapshotData.postValue(null)
                     Log.d(ContentValues.TAG, "No such document table-card")
+                }
+            }
+    }
+
+    override fun getFirebaseCreatedBacklogSnapshot(session_id: String) {
+        databaseInstance.firestoreInstance.collection("backlog")
+            .whereEqualTo("sesion_id",session_id)
+            .limit(1)
+            .addSnapshotListener{ snapshot, e ->
+
+                if (e != null) {
+                    Log.w(ContentValues.TAG, "Listen failed.", e)
+                    backlogCreatedSnapshotData.postValue(null)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    for (doc in snapshot.documents){
+                        Log.d(ContentValues.TAG, "DocumentSnapshot data session: ${doc.data}")
+                        backlogCreatedSnapshotData.postValue(
+                            Backlog(
+                                doc.data?.get("created_at").toString(),
+                                doc.data?.get("modified_at").toString(),
+                                doc.data?.get("project_id").toString(),
+                                doc.data?.get("project_name").toString(),
+                                doc.data?.get("status").toString(),
+                                doc.data?.get("session_id").toString(),
+                                doc.id
+                            )
+                        )
+                    }
+
+                } else {
+                    backlogCreatedSnapshotData.postValue(null)
+                    Log.d(ContentValues.TAG, "No such document backlog")
                 }
             }
     }

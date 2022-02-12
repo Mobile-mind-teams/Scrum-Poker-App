@@ -35,7 +35,7 @@ class BacklogStoryAdapter(val list: List<BacklogStory>, val listener: CustomStor
 
         fun bind(story: BacklogStory) {
             itemView.findViewById<TextView>(R.id.story_title).text = story.title
-            itemView.findViewById<TextView>(R.id.story_weight).text = story.weight
+            itemView.findViewById<TextView>(R.id.story_weight).text = story.weight.toString()
             itemView.findViewById<TextView>(R.id.story_description).text = story.description
         }
     }

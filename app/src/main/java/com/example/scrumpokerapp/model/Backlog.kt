@@ -13,12 +13,40 @@ class Backlog {
 
     constructor(){}
 
-    constructor(project_name: String, project_id: String, status: String, doc_id : String){
-        this.project_name = project_name
+    constructor(
+        created_at: String?,
+        modified_at: String?,
+        project_id: String?,
+        project_name: String?,
+        status: String?,
+        session_id: String?
+    ) {
+        this.created_at = created_at
+        this.modified_at = modified_at
         this.project_id = project_id
+        this.project_name = project_name
         this.status = status
+        this.session_id = session_id
+    }
+
+    constructor(
+        created_at: String?,
+        modified_at: String?,
+        project_id: String?,
+        project_name: String?,
+        status: String?,
+        session_id: String?,
+        doc_id: String?
+    ) {
+        this.created_at = created_at
+        this.modified_at = modified_at
+        this.project_id = project_id
+        this.project_name = project_name
+        this.status = status
+        this.session_id = session_id
         this.doc_id = doc_id
     }
+
 
     override fun toString(): String {
         return "Backlog => {\n" +

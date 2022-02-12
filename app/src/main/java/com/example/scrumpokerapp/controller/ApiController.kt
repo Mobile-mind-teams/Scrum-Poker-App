@@ -655,4 +655,95 @@ class ApiController {
         })
     }
 
+    fun createBacklogAPI(backlog: Backlog){
+        service.createBacklog(backlog).enqueue(object : Callback<BacklogResponse>{
+            override fun onResponse(
+                call: Call<BacklogResponse>,
+                response: Response<BacklogResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data POST: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data POST: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                backlogResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<BacklogResponse>, t: Throwable) {
+                backlogResponseMutableLiveData.postValue(null)
+                Log.i("Backlopg Data: ","POST: " + 500 + " " + t.stackTraceToString())
+            }
+        })
+    }
+
+    fun getStoriesForBacklog(session_id: String){
+        service.getAllStoriesForBacklog(session_id).enqueue(object : Callback<SessionStoriesResponse>{
+            override fun onResponse(
+                call: Call<SessionStoriesResponse>,
+                response: Response<SessionStoriesResponse>
+            ) {
+                if (response.isSuccessful && response.body() != null){
+                    Log.i("${response.body()?.collection} Data GET: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                } else {
+                    Log.i("${response.body()?.collection} Data GET: ", "${response.body()?.message} " + 200 + " Not Found!")
+                }
+
+                sessionStoriesResponseMutableLiveData.postValue(response.body())
+            }
+
+            override fun onFailure(call: Call<SessionStoriesResponse>, t: Throwable) {
+                sessionStoriesResponseMutableLiveData.postValue(null)
+                Log.i("Session Story List Data: ","GET: " + 500 + " " + t.stackTraceToString())
+            }
+        })
+    }
+
+    fun addStoriesToBacklog(storyList: List<SessionStory>, docId: String) {
+        var backlogStoryList : List<BacklogStory> = ProjectUtils().convertSessionStoriesToBacklogStories(storyList)
+        var backlogStoryListResponse : ArrayList<BacklogStory> = arrayListOf()
+        var message: String = ""
+        var collection: String = ""
+        var isSuccessfulProcess: Boolean = true
+        var index = 0
+        for (backlogStory in backlogStoryList){
+            service.addStoryToBacklog(backlogStory, docId, backlogStory.sid).enqueue(object : Callback<BacklogStoryResponse>{
+                override fun onResponse(
+                    call: Call<BacklogStoryResponse>,
+                    response: Response<BacklogStoryResponse>
+                ) {
+                    if (response.isSuccessful && response.body() != null){
+                        Log.i("${response.body()?.collection} Data POST: "," ${response.body()?.message} " + 200 + " " + response.body()?.data)
+                    } else {
+                        Log.i("${response.body()?.collection} Data POST: ", "${response.body()?.message} " + 200 + " Not Found!")
+                    }
+
+                    if (collection == "" && message == ""){
+                        collection = response.body()?.collection.toString()
+                        message = response.body()?.message.toString()
+                    }
+
+                    backlogStoryListResponse.add(response.body()?.data?.get(index)!!)
+                }
+
+                override fun onFailure(call: Call<BacklogStoryResponse>, t: Throwable) {
+                    isSuccessfulProcess = false
+                    Log.i("Session Story Data: ","POST: " + 500 + " " + t.stackTraceToString())
+                }
+            })
+        }
+
+        if (isSuccessfulProcess){
+            backlogStoriesResponseMutableLiveData.postValue(
+                BacklogStoryResponse(
+                    collection,
+                    message,
+                    backlogStoryListResponse
+                )
+            )
+        } else {
+            storySessionListMutableLiveData.postValue(null)
+        }
+    }
+
 }

@@ -90,4 +90,18 @@ interface ApiService {
     fun updateTableCards(@Body userCard: UserCard,
                          @Path("document_id") document_id : String,
                          @Path("story_id") story_id : String) : Call<TableCardResponse>
+
+    @POST("backlogs/add")
+    fun createBacklog(@Body backlog: Backlog): Call<BacklogResponse>
+
+    @GET("stories/session/agreed/all/{id}")
+    fun getAllStoriesForBacklog(
+        @Path("id") doc_id: String,
+    ): Call<SessionStoriesResponse>
+
+    @POST("stories/add/{document_id}&{story_id}&backlog")
+    fun addStoryToBacklog(@Body backlogStory: BacklogStory,
+                          @Path("document_id") backlog_id: String,
+                          @Path("story_id") story_id: String?
+    ): Call<BacklogStoryResponse>
 }

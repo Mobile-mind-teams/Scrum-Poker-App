@@ -1,19 +1,13 @@
 package com.example.scrumpokerapp.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.StoryListItemBinding
-import com.example.scrumpokerapp.model.Session
-import com.example.scrumpokerapp.model.SessionStory
-import com.example.scrumpokerapp.model.UserCard
+import com.example.scrumpokerapp.model.*
 import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.repository.SnapshotRepository
-import com.example.scrumpokerapp.service.response.CardsResponse
-import com.example.scrumpokerapp.service.response.SessionResponse
-import com.example.scrumpokerapp.service.response.SessionStoriesResponse
-import com.example.scrumpokerapp.service.response.TableCardResponse
+import com.example.scrumpokerapp.service.response.*
 import com.example.scrumpokerapp.utils.ProjectUtils
 
 class SessionViewModel(val apiController: ApiController) : ViewModel() {
@@ -25,16 +19,21 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
     val tableCardSent: MutableLiveData<TableCardResponse?> = apiController.tableCardResponseMutableLiveData
     val currentStory: MutableLiveData<SessionStory?> = snapshotRepository.currentStorySnapshotData
     val isAllStoryList : MutableLiveData<Boolean> = MutableLiveData()
+    val goToHomeData : MutableLiveData<Boolean> = MutableLiveData()
     val sessionSnapshotData : MutableLiveData<Session?> = snapshotRepository.sessionSnapshotMutableLiveData
     val tableData : MutableLiveData<TableCardResponse?> = snapshotRepository.pokerTableSnapshotData
     val clearTableData : MutableLiveData<TableCardResponse?> = snapshotRepository.clearPokerTableSnapshotData
     val userCardInfo : MutableLiveData<UserCard?> = MutableLiveData()
     val currentCardSent : MutableLiveData<UserCard?> = snapshotRepository.currentCardSentSnapshotData
+    val backlogSnapshotData: MutableLiveData<Backlog?> = snapshotRepository.backlogCreatedSnapshotData
+    val backlogStoryListData: MutableLiveData<BacklogStoryResponse?> = apiController.backlogStoriesResponseMutableLiveData
+    val projectUpdateMutableLiveData : MutableLiveData<ProjectResponse?> = apiController.projectUpdateResponseMutableLiveData
 
     lateinit var currentUser : UserProfile
     lateinit var sessionObject : Session
     var storyListToWork : ArrayList<SessionStory> = arrayListOf()
     var cardsOnTable : ArrayList<UserCard> = arrayListOf()
+    var areAllSessionStoriesWithWeightValue : Boolean = true
 
     fun getDeckByUserRole(role_string: String) {
         apiController.getDeckByUserRole(role_string)
@@ -59,6 +58,10 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
 
     fun getSessionSnapshot(session_id: String){
         snapshotRepository.getFirebaseSessionSnapshot(session_id)
+    }
+
+    fun getBacklogSnapshot(session_id: String){
+        snapshotRepository.getFirebaseCreatedBacklogSnapshot(session_id)
     }
 
     fun getCurrentStorySessionSanpshot(session_id: String){
@@ -91,6 +94,9 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
 
     fun loadSessionStories(storyList : List<SessionStory>){
         for (story in storyList){
+            if (story.weight == 0.0){
+                areAllSessionStoriesWithWeightValue = false
+            }
             storyListToWork.add(story)
         }
     }
@@ -164,6 +170,7 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
 
     fun finishSession(session: Session) {
         session.status = "finished"
+        session.finished_at = ProjectUtils().generateTimeStamp()
         apiController.updateSession(session)
     }
 
@@ -198,13 +205,53 @@ class SessionViewModel(val apiController: ApiController) : ViewModel() {
                 "repeatTurn" -> repeatTurn(sessionObject.session_id!!, currentStory.value?.doc_id!!)
                 "flipCards" -> flipCards(sessionObject.session_id!!, cardsOnTable)
                 "finishSession" -> finishSession(sessionObject)
+                "goToHome" -> goToHome()
                 else -> setTableCard(userCard, sessionObject.session_id!!)
             }
         }
     }
 
+    private fun goToHome() {
+        goToHomeData.postValue(true)
+    }
+
     private fun showCardInfo(userCard: UserCard) {
         userCardInfo.postValue(userCard)
+    }
+
+    fun createBacklog(sessionObject: Session) {
+        apiController.createBacklogAPI(Backlog(
+            ProjectUtils().generateTimeStamp(),
+            "-",
+            sessionObject.project_id,
+            sessionObject.project_name,
+            getBacklogStatus(),
+            sessionObject.session_id
+        ))
+    }
+
+    fun addStoriesToBacklog(storyList: List<SessionStory>) {
+        if (backlogStoryListData.value == null){
+            apiController.addStoriesToBacklog(storyList, backlogSnapshotData.value?.doc_id!!)
+        }
+    }
+
+    fun getStoriesForBacklog(session_id: String) {
+        apiController.getStoriesForBacklog(session_id)
+    }
+
+    fun updateProjectStatus(project: Project) {
+        apiController.updateProject(
+            project
+        )
+    }
+
+    fun getProjectStatus(): String {
+        return if (areAllSessionStoriesWithWeightValue) "assignedToBacklog" else "unassigned"
+    }
+
+    fun getBacklogStatus(): String {
+        return if (areAllSessionStoriesWithWeightValue) "complete" else "incomplete"
     }
 
 }

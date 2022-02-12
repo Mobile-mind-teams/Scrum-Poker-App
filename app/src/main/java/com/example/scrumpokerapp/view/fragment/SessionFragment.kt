@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentSessionBinding
-import com.example.scrumpokerapp.model.Session
+import com.example.scrumpokerapp.model.Project
 import com.example.scrumpokerapp.model.UserCard
 import com.example.scrumpokerapp.utils.ProjectUtils
 import com.example.scrumpokerapp.view.activity.MainActivity
@@ -74,10 +74,27 @@ class SessionFragment(val session_id: String) : Fragment(), CustomCardItemListen
                 sessionViewModel.currentUser.role
         )){
             //Para PO
+
+            //Iniciar MutableLiveData de backlogStoryListData, projectUpdateMutableLiveData, goToHome
+            sessionViewModel.backlogStoryListData.postValue(null)
+
+            sessionViewModel.projectUpdateMutableLiveData.postValue(null)
+
+            sessionViewModel.goToHomeData.postValue(false)
+
+            //Cargar snapshot de backlog
+            sessionViewModel.getBacklogSnapshot(session_id)
+
             //Observer de carga de historias a trabajar
             sessionViewModel.sessionStoryList.observe(viewLifecycleOwner, Observer {
                 if(it != null){
                     sessionViewModel.loadSessionStories(it.data)
+                    if(sessionViewModel.sessionSnapshotData.value?.status == "finished"){
+                        sessionViewModel.createBacklog(sessionViewModel.sessionObject)
+                    }
+                } else {
+                    //Capturar error de carga de historias a backlog
+                    binding.progressBar.visibility = View.INVISIBLE
                 }
             })
 
@@ -86,6 +103,62 @@ class SessionFragment(val session_id: String) : Fragment(), CustomCardItemListen
                     Log.i("Story List: ","FINISHED: ")
                     sessionViewModel.loadEndoOfListItem(binding.currentStoryLayout)
                     sessionViewModel.getSessionStories(session_id)
+                }
+            })
+
+            sessionViewModel.backlogSnapshotData.observe(viewLifecycleOwner, Observer {
+                if (it != null ){
+                    //Backlog Creado
+
+                    //Agregar Historias
+                    sessionViewModel.addStoriesToBacklog(
+                        sessionViewModel.storyListToWork
+                    )
+                } else {
+                    //Capturar error de backlog no creado
+                    binding.progressBar.visibility = View.INVISIBLE
+                }
+            })
+
+            sessionViewModel.backlogStoryListData.observe(viewLifecycleOwner, Observer {
+                if (it != null){
+                    //Lista de historias Creada, actualizar proyecto
+                    sessionViewModel.updateProjectStatus(
+                        Project(
+                            sessionViewModel.sessionObject.project_name,
+                            sessionViewModel.sessionObject.project_id,
+                            session_id,
+                            sessionViewModel.backlogSnapshotData.value?.doc_id,
+                            sessionViewModel.getProjectStatus()
+                        )
+                    )
+                } else {
+                    //Capturar error de lista de backlog no creada
+                    binding.progressBar.visibility = View.INVISIBLE
+                }
+            })
+
+            sessionViewModel.projectUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
+                if (it != null) {
+                    Toast.makeText(context,"Historias Agregadas a Backlog!", Toast.LENGTH_SHORT).show()
+
+                    Toast.makeText(context,"Estados Actualizados!", Toast.LENGTH_SHORT).show()
+
+                    Toast.makeText(context,"Backlog Creado!", Toast.LENGTH_SHORT).show()
+
+                    binding.progressBar.visibility = View.INVISIBLE
+                    goToHome()
+                } else {
+                    //Capturar error de actualizacion de proyecto
+                    binding.progressBar.visibility = View.INVISIBLE
+                }
+            })
+
+            sessionViewModel.goToHomeData.observe(viewLifecycleOwner, Observer {
+                if(it != null) {
+                    if (it){
+                        goToHome()
+                    }
                 }
             })
         }
@@ -120,8 +193,11 @@ class SessionFragment(val session_id: String) : Fragment(), CustomCardItemListen
 
         sessionViewModel.sessionSnapshotData.observe(viewLifecycleOwner, Observer {
             if (it != null){
-                if (it.status == "onBreak" || it.status == "finished"){
+                if (it.status == "onBreak" || (it.status == "finished" && !ProjectUtils().isProjectOwner(sessionViewModel.currentUser.role))){
                     goToHome()
+                } else if (it.status == "finished" && ProjectUtils().isProjectOwner(sessionViewModel.currentUser.role)) {
+                    binding.progressBar.visibility = View.VISIBLE
+                    sessionViewModel.getStoriesForBacklog(session_id)
                 }
             }
         })
@@ -191,6 +267,7 @@ class SessionFragment(val session_id: String) : Fragment(), CustomCardItemListen
     }
 
     private fun goToHome() {
+        sessionViewModel.goToHomeData.postValue(false)
         (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(true)
         (activity as? MainActivity)?.replaceFragment(HomeFragment.newInstance(), "HomeFragment")
     }
