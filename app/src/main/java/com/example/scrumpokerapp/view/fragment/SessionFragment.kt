@@ -56,6 +56,8 @@ class SessionFragment(val session_id: String) : Fragment(), CustomCardItemListen
         )
 
         //Carga de objeto de sesion
+        sessionViewModel.sessionData.postValue(null)
+
         sessionViewModel.getSessionData(session_id)
 
         //Observer de carga de sesion
