@@ -12,16 +12,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentBacklogBinding
+import com.example.scrumpokerapp.model.Backlog
 import com.example.scrumpokerapp.model.BacklogStory
 import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.view.adapter.BacklogAdapter
 import com.example.scrumpokerapp.view.adapter.BacklogStoryAdapter
-import com.example.scrumpokerapp.view.listener.CustomItemListener
+import com.example.scrumpokerapp.view.listener.CustomBacklogListener
 import com.example.scrumpokerapp.view.listener.CustomStoryItemListener
 import com.example.scrumpokerapp.viewmodel.BacklogViewModel
 import com.example.scrumpokerapp.viewmodel.BacklogViewModelFactory
 
-class BacklogFragment : Fragment(), CustomItemListener, CustomStoryItemListener {
+class BacklogFragment : Fragment(), CustomBacklogListener, CustomStoryItemListener {
 
     private lateinit var backlogViewModel: BacklogViewModel
 
@@ -87,11 +88,21 @@ class BacklogFragment : Fragment(), CustomItemListener, CustomStoryItemListener 
 
     }
 
-    override fun getSelectedItemDocId(doc_id: String){
-        backlogViewModel.selectedItemDocId.postValue(doc_id)
+    override fun getSelectedBacklogItem(backlog: Backlog, longClick: Boolean){
+        if (longClick && backlog.status == "incomplete"){
+            goToCreateSessionFromBacklog(backlog)
+        } else {
+            backlogViewModel.selectedItemDocId.postValue(backlog.doc_id)
+        }
+    }
+
+    private fun goToCreateSessionFromBacklog(backlog: Backlog) {
+        (activity as? MainActivity)?.replaceFragment(CreateBacklogSessionFragment.newInstance(backlog), "BacklogFragment")
     }
 
     override fun getSelectedItem(story: BacklogStory) {
         (activity as? MainActivity)?.replaceFragment(BacklogFragment.newInstance(), "BacklogFragment")
     }
+
+
 }

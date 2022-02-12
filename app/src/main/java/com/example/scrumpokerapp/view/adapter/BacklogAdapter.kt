@@ -7,9 +7,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.model.Backlog
-import com.example.scrumpokerapp.view.listener.CustomItemListener
+import com.example.scrumpokerapp.view.listener.CustomBacklogListener
 
-class BacklogAdapter(val backlogList: List<Backlog>, val listener: CustomItemListener? = null) : RecyclerView.Adapter<BacklogAdapter.BacklogViewHolder>() {
+class BacklogAdapter(val backlogList: List<Backlog>, val listener: CustomBacklogListener? = null) : RecyclerView.Adapter<BacklogAdapter.BacklogViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BacklogViewHolder {
         return BacklogViewHolder(
@@ -27,7 +27,12 @@ class BacklogAdapter(val backlogList: List<Backlog>, val listener: CustomItemLis
         holder.bind(backlogList[position])
 
         holder.itemView.setOnClickListener {
-            listener?.getSelectedItemDocId(backlogList[position].doc_id.toString())
+            listener?.getSelectedBacklogItem(backlogList[position], false)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            listener?.getSelectedBacklogItem(backlogList[position], true)
+            true
         }
     }
 

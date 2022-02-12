@@ -50,16 +50,14 @@ class ProjectUtils {
     fun convertSessionStoriesToBacklogStories(list: List<SessionStory>): List<BacklogStory>{
         var backlogStoryList: ArrayList<BacklogStory> = arrayListOf()
         for (item in list){
-            if(item.weight != 0.0){
-                backlogStoryList.add(
-                    BacklogStory(
-                        item.title,
-                        item.description,
-                        item.weight,
-                        item.doc_id
-                    )
+            backlogStoryList.add(
+                BacklogStory(
+                    item.title,
+                    item.description,
+                    item.weight,
+                    item.doc_id
                 )
-            }
+            )
         }
         return backlogStoryList
     }
