@@ -13,7 +13,6 @@ import com.example.scrumpokerapp.utils.ProjectUtils
 class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
 
     val snapshotRepository: SnapshotRepository = SnapshotRepository()
-    val sessionData: MutableLiveData<SessionResponse?> = apiController.currentSessionResponseMutableLiveData
     val deckData: MutableLiveData<CardsResponse?> = apiController.cardsResponseMutableLiveData
     val sessionStoryList: MutableLiveData<SessionStoriesResponse?> = apiController.sessionStoriesResponseMutableLiveData
     val tableCardSent: MutableLiveData<TableCardResponse?> = apiController.tableCardResponseMutableLiveData
@@ -21,15 +20,8 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
     val isAllStoryList : MutableLiveData<Boolean> = MutableLiveData()
     val goToHomeData : MutableLiveData<Boolean> = MutableLiveData()
     val sessionSnapshotData : MutableLiveData<Session?> = snapshotRepository.sessionSnapshotMutableLiveData
-    val tableData : MutableLiveData<TableCardResponse?> = snapshotRepository.pokerTableSnapshotData
-    val clearTableData : MutableLiveData<TableCardResponse?> = snapshotRepository.clearPokerTableSnapshotData
-    val userCardInfo : MutableLiveData<UserCard?> = MutableLiveData()
-    val currentCardSent : MutableLiveData<UserCard?> = snapshotRepository.currentCardSentSnapshotData
     val backlogSnapshotData: MutableLiveData<Backlog?> = snapshotRepository.backlogCreatedSnapshotData
     val backlogStoryListData: MutableLiveData<BacklogStoryResponse?> = apiController.backlogStoriesResponseMutableLiveData
-    val projectUpdateMutableLiveData : MutableLiveData<ProjectResponse?> = apiController.projectUpdateResponseMutableLiveData
-    val adminUpdateMutableLiveData : MutableLiveData<UsersResponse?> = apiController.adminResponseMutableLiveData
-    val userUpdateMutableLiveData : MutableLiveData<UsersResponse?> = apiController.userUpdateResponseMutableLiveData
 
     var storyListToWork : ArrayList<SessionStory> = arrayListOf()
     var cardsOnTable : ArrayList<UserCard> = arrayListOf()
@@ -41,19 +33,6 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
 
     fun getSessionStories(session_id: String){
         apiController.getStoryListBySessionID(session_id)
-    }
-
-    fun setTableCard(card: UserCard, session_id: String){
-        if (validaUserCard()){
-            card.doc_id = currentCardSent.value?.doc_id
-            apiController.updateTableCard(session_id, card)
-        } else {
-            apiController.setTableCard(card,session_id)
-        }
-    }
-
-    private fun validaUserCard(): Boolean {
-        return currentCardSent.value != null
     }
 
     fun getSessionSnapshot(session_id: String){
@@ -78,10 +57,6 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
 
     fun getCurrentCardSentData(session_id: String, user_id: String){
         snapshotRepository.getFirebaseCurrentCardSentSnapshot(session_id, user_id)
-    }
-
-    fun getSessionData(session_id: String){
-        apiController.getSessionByID(session_id)
     }
 
     fun loadSessionStories(storyList : List<SessionStory>){
@@ -110,7 +85,6 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
     fun goToBreak(session: Session){
         session.status = "onBreak"
         currentStorySnapshot.value?.visibility = false
-        apiController.updateStoryFrom(currentStorySnapshot.value!!, session.session_id!!, "session")
         apiController.updateSession(session)
     }
 
@@ -191,31 +165,30 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
                 "repeatTurn" -> repeatTurn(session.session_id!!, currentStorySnapshot.value?.doc_id!!)
                 "flipCards" -> flipCards(session.session_id!!, cardsOnTable)
                 "finishSession" -> finishSession(session)
-                "goToHome" -> goToHome()
-                else -> setTableCard(userCard, session.session_id!!)
+                "goToHome" -> goToHomeData.postValue(true)
             }
         }
-    }
-
-    private fun goToHome() {
-        goToHomeData.postValue(true)
-    }
-
-    private fun showCardInfo(userCard: UserCard) {
-        userCardInfo.postValue(userCard)
     }
 
     fun createBacklog(session: Session) {
         apiController.createBacklogAPI(
             Backlog(
                 ProjectUtils().generateTimeStamp(),
-                ProjectUtils().generateModifiedTimeStamp(session),
+                "-",
                 session.project_id,
                 session.project_name,
                 getBacklogStatus(),
                 session.session_id
             )
         )
+    }
+
+    fun validateBacklog(session: Session){
+        if (session.status == "complementary"){
+            //Actualizar Backlog
+        } else {
+            createBacklog(session)
+        }
     }
 
     fun addStoriesToBacklog(storyList: List<SessionStory>) {
@@ -251,21 +224,5 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
             userProfile.doc_id.toString(),
             userProfile.role
         )
-    }
-
-    fun updateUserStatus(userProfile: UserProfile?){
-        apiController.updateUser(
-            User(
-                userProfile?.email!!,
-                "available"
-            ),
-            userProfile.doc_id.toString(),
-            userProfile.role
-        )
-    }
-
-    fun updateUserProfile(userProfile: UserProfile?) : UserProfile {
-        userProfile?.status = "available"
-        return userProfile!!
     }
 }

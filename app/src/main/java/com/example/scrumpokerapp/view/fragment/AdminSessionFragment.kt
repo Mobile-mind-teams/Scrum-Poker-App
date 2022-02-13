@@ -99,7 +99,7 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
             if(it != null){
                 sessionViewModel.loadSessionStories(it.data)
                 if(sessionViewModel.sessionSnapshotData.value?.status == "finished"){
-                    sessionViewModel.createBacklog(session.value!!)
+                    sessionViewModel.validateBacklog(session.value!!)
                 }
             } else {
                 //Capturar error de carga de historias a backlog
@@ -112,7 +112,7 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
                 if (it.status == "onBreak"){
                     goToHome()
                 } else if (it.status == "finished" && !(activity as? MainActivity)?.mainActivityViewModel?.isProjectOwner()!!){
-                    sessionViewModel.updateUserStatus(
+                    sessionViewModel.updateAdminStatus(
                         (activity as? MainActivity)?.mainActivityViewModel?.getUserProfile()!!
                     )
                 }
@@ -155,6 +155,14 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
             }
         })
 
+        sessionViewModel.goToHomeData.observe(viewLifecycleOwner, Observer {
+            if(it != null) {
+                if (it){
+                    goToHome()
+                }
+            }
+        })
+
         /*if (ProjectUtils().isProjectOwner(
                 sessionViewModel.currentUser.role
         )){
@@ -164,8 +172,6 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
             sessionViewModel.backlogStoryListData.postValue(null)
 
             sessionViewModel.projectUpdateMutableLiveData.postValue(null)
-
-            sessionViewModel.goToHomeData.postValue(false)
 
             sessionViewModel.backlogSnapshotData.observe(viewLifecycleOwner, Observer {
                 if (it != null ){
@@ -227,28 +233,7 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
                     binding.progressBar.visibility = View.INVISIBLE
                 }
             })
-
-            sessionViewModel.goToHomeData.observe(viewLifecycleOwner, Observer {
-                if(it != null) {
-                    if (it){
-                        goToHome()
-                    }
-                }
-            })
         }*/
-
-        //Para todos
-
-
-
-
-        /*//Iniciar snapshot de la sesion activa
-        sessionViewModel.sessionSnapshotData.postValue(null)
-
-        //Cargar snapshot de la sesion activa
-        sessionViewModel.getSessionSnapshot(session.value?.session_id.toString())*/
-
-
 
         //Observer de la mesa
         /*sessionViewModel.tableData.observe(viewLifecycleOwner, Observer {
