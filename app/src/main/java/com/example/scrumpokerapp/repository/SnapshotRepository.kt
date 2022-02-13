@@ -18,7 +18,6 @@ class SnapshotRepository: SnapshotService{
 
     var databaseInstance: DataBaseInstance
     val sessionSnapshotMutableLiveData : MutableLiveData<Session?>
-    val userSessionSnapshotData : MutableLiveData<Session?>
     val currentStorySnapshotData : MutableLiveData<SessionStory?>
     val pokerTableSnapshotData : MutableLiveData<TableCardResponse?>
     val clearPokerTableSnapshotData : MutableLiveData<TableCardResponse?>
@@ -28,7 +27,6 @@ class SnapshotRepository: SnapshotService{
     constructor(){
         databaseInstance = DataBaseInstance().initDataBaseInstance(DATABASE_INSTANCE_TYPE)
         sessionSnapshotMutableLiveData = MutableLiveData()
-        userSessionSnapshotData = MutableLiveData()
         currentStorySnapshotData = MutableLiveData()
         pokerTableSnapshotData = MutableLiveData()
         clearPokerTableSnapshotData = MutableLiveData()
@@ -75,14 +73,14 @@ class SnapshotRepository: SnapshotService{
 
                 if (e != null) {
                     Log.w(ContentValues.TAG, "Listen failed.", e)
-                    userSessionSnapshotData.postValue(null)
+                    sessionSnapshotMutableLiveData.postValue(null)
                     return@addSnapshotListener
                 }
 
                 if (snapshot != null && !snapshot.isEmpty) {
                     for (doc in snapshot.documents){
-                        Log.d(ContentValues.TAG, "DocumentSnapshot data session: ${doc.data}")
-                        userSessionSnapshotData.postValue(
+                        Log.d(ContentValues.TAG, "DocumentSnapshot data user session: ${doc.data}")
+                        sessionSnapshotMutableLiveData.postValue(
                             Session(
                                 doc.data?.get("project_name").toString(),
                                 doc.data?.get("project_id").toString(),
@@ -94,8 +92,40 @@ class SnapshotRepository: SnapshotService{
                     }
 
                 } else {
-                    userSessionSnapshotData.postValue(null)
-                    Log.d(ContentValues.TAG, "No such document session")
+                    sessionSnapshotMutableLiveData.postValue(null)
+                    Log.d(ContentValues.TAG, "No such document user session")
+                }
+            }
+    }
+
+    override fun getFirebaseAdminSessionListSnapshot(adminUid: String) {
+        databaseInstance.firestoreInstance.collection("session")
+            .whereEqualTo("admin_id",adminUid)
+            .addSnapshotListener{ snapshot, e ->
+
+                if (e != null) {
+                    Log.w(ContentValues.TAG, "Listen failed.", e)
+                    sessionSnapshotMutableLiveData.postValue(null)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    for (doc in snapshot.documents){
+                        Log.d(ContentValues.TAG, "DocumentSnapshot data admin session: ${doc.data}")
+                        sessionSnapshotMutableLiveData.postValue(
+                            Session(
+                                doc.data?.get("project_name").toString(),
+                                doc.data?.get("project_id").toString(),
+                                doc.id,
+                                doc.data?.get("status").toString(),
+                                doc.data?.get("team") as List<String>
+                            )
+                        )
+                    }
+
+                } else {
+                    sessionSnapshotMutableLiveData.postValue(null)
+                    Log.d(ContentValues.TAG, "No such document admin session")
                 }
             }
     }

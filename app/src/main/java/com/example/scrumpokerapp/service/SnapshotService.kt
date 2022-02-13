@@ -5,6 +5,8 @@ interface SnapshotService {
 
     fun getFirebaseUserSessionListSnapshot(userEmail: String)
 
+    fun getFirebaseAdminSessionListSnapshot(adminUid: String)
+
     fun getFirebaseCurrentStorySnapshot(session_id: String)
 
     fun getFirebasePokerTableSnapshot(session_id: String, story_id: String)

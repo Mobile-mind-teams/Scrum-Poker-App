@@ -49,14 +49,16 @@ class HomeFragment : Fragment(), CustomSessionItemListener {
         )[HomeViewModel::class.java]
 
         homeViewModel.getSessionList(
-            (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
+            (activity as? MainActivity)?.mainActivityViewModel?.getUserProfile()!!
         )
 
-        if (!ProjectUtils().isProjectOwner(
-                (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.role!!
-        )){
+        if ((activity as? MainActivity)?.mainActivityViewModel?.isProjectOwner()!!){
+            homeViewModel.loadAdminSessionSnapshot(
+                (activity as? MainActivity)?.mainActivityViewModel?.getUserProfile()?.uid.toString()
+            )
+        } else {
             homeViewModel.loadUserSessionSnapshot(
-                (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.email.toString()
+                (activity as? MainActivity)?.mainActivityViewModel?.getUserProfile()?.email.toString()
             )
         }
 
@@ -84,23 +86,17 @@ class HomeFragment : Fragment(), CustomSessionItemListener {
         homeViewModel.sessionStatusData.observe(viewLifecycleOwner, Observer {
             if(it != null){
                 if (it){
-                    goToSession()
+                    goToSession(
+                        (activity as? MainActivity)?.mainActivityViewModel?.isProjectOwner()!!
+                    )
                 }
             }
         })
 
-        homeViewModel.sesionUpdateData.observe(viewLifecycleOwner, Observer {
-            if (it != null){
-                if (it.data.get(0).status == "inProgress"){
-                    goToSession()
-                }
-            }
-        })
-
-        homeViewModel.userSessionData.observe(viewLifecycleOwner, Observer {
+        homeViewModel.sessionSnapshotData.observe(viewLifecycleOwner, Observer {
             if (it != null){
                 homeViewModel.getSessionList(
-                    (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
+                    (activity as? MainActivity)?.mainActivityViewModel?.getUserProfile()
                 )
                 Toast.makeText(context,"Listado Actualizado!", Toast.LENGTH_SHORT).show()
             }
@@ -110,16 +106,19 @@ class HomeFragment : Fragment(), CustomSessionItemListener {
     }
 
     override fun getSelectedItem(session: Session) {
-        homeViewModel.currentSessionID = session.session_id!!
+        homeViewModel.currentSession.postValue(session)
         homeViewModel.processActionByUserRole(
             session,
-            ProjectUtils().isProjectOwner(
-            (activity as? MainActivity)?.mainActivityViewModel?.userData?.value?.role
-        ))
+            (activity as? MainActivity)?.mainActivityViewModel?.isProjectOwner()!!
+        )
     }
 
-    fun goToSession(){
+    fun goToSession(isAdmin: Boolean){
         (activity as? MainActivity)?.mainActivityViewModel?.showBottomNavigationMenu?.postValue(false)
-        (activity as? MainActivity)?.replaceFragment(SessionFragment.newInstance(homeViewModel.currentSessionID), "SessionFragment")
+        if (isAdmin){
+            (activity as? MainActivity)?.replaceFragment(AdminSessionFragment.newInstance(homeViewModel.currentSession), "AdminSessionFragment")
+        } else {
+            (activity as? MainActivity)?.replaceFragment(UserSessionFragment.newInstance(homeViewModel.currentSession), "UserSessionFragment")
+        }
     }
 }

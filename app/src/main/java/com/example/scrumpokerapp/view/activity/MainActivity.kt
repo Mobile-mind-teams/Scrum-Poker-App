@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.databinding.ActivityMainBinding
+import com.example.scrumpokerapp.persistance.UserProfile
 import com.example.scrumpokerapp.utils.ProjectUtils
 import com.example.scrumpokerapp.view.fragment.*
 import com.example.scrumpokerapp.viewmodel.MainActivityViewModel
@@ -41,9 +42,7 @@ class MainActivity : AppCompatActivity() {
                 if (it){
                     binding.bottomNavigationMenu.visibility = View.VISIBLE
 
-                    if (ProjectUtils().showCreateSession(
-                            mainActivityViewModel.userData?.value
-                    )){
+                    if (mainActivityViewModel.showCreateSession()){
                         mainActivityViewModel.showCreateSessionBottomNavigationMenuItem.postValue(true)
                     }
                 } else {

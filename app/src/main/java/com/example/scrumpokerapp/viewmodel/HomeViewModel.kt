@@ -17,12 +17,11 @@ class HomeViewModel (
     ) : ViewModel() {
 
     val snapshotRepository: SnapshotRepository = SnapshotRepository()
-    val userSessionData: MutableLiveData<Session?> = snapshotRepository.userSessionSnapshotData
+    val sessionSnapshotData: MutableLiveData<Session?> = snapshotRepository.sessionSnapshotMutableLiveData
     val sesionListData: MutableLiveData<SessionResponse?> = apiController.sessionResponseMutableLiveData
-    val sesionUpdateData: MutableLiveData<SessionResponse?> = apiController.sessionUpdateMutableLiveData
     val sessionStatusData: MutableLiveData<Boolean> = MutableLiveData()
 
-    var currentSessionID : String = ""
+    val currentSession : MutableLiveData<Session> = MutableLiveData()
 
     fun getAllUserSessions(uid: String){
         apiController.getAllUserSessions(uid)
@@ -72,6 +71,10 @@ class HomeViewModel (
 
     fun loadUserSessionSnapshot(email: String){
         snapshotRepository.getFirebaseUserSessionListSnapshot(email)
+    }
+
+    fun loadAdminSessionSnapshot(uid: String){
+        snapshotRepository.getFirebaseAdminSessionListSnapshot(uid)
     }
 
 }
