@@ -23,6 +23,7 @@ class SnapshotRepository: SnapshotService{
     val clearPokerTableSnapshotData : MutableLiveData<TableCardResponse?>
     val currentCardSentSnapshotData : MutableLiveData<UserCard?>
     val backlogCreatedSnapshotData : MutableLiveData<Backlog?>
+    val updatedStorySnapshotData : MutableLiveData<SessionStory?>
 
     constructor(){
         databaseInstance = DataBaseInstance().initDataBaseInstance(DATABASE_INSTANCE_TYPE)
@@ -32,6 +33,7 @@ class SnapshotRepository: SnapshotService{
         clearPokerTableSnapshotData = MutableLiveData()
         currentCardSentSnapshotData = MutableLiveData()
         backlogCreatedSnapshotData = MutableLiveData()
+        updatedStorySnapshotData = MutableLiveData()
     }
 
     override fun getFirebaseSessionSnapshot(session_id: String){
@@ -163,6 +165,43 @@ class SnapshotRepository: SnapshotService{
                 } else {
                     currentStorySnapshotData.postValue(null)
                     Log.d(ContentValues.TAG, "No such document story visibility true")
+                }
+            }
+    }
+
+    override fun getFirebaseUpdatedStorySnapshot(session_id: String) {
+        databaseInstance.firestoreInstance.collection("session")
+            .document(session_id)
+            .collection("story")
+            .whereEqualTo("agreed_status", true)
+            .addSnapshotListener{ snapshot, e ->
+
+                if (e != null) {
+                    Log.w(ContentValues.TAG, "Listen failed.", e)
+                    updatedStorySnapshotData.postValue(null)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    for (doc in snapshot.documents){
+                        Log.d(ContentValues.TAG, "DocumentSnapshot data story-session: ${doc.data}")
+                        updatedStorySnapshotData.postValue(
+                            SessionStory(
+                                doc.data?.get("title").toString(),
+                                doc.data?.get("description").toString(),
+                                doc.data?.get("weight").toString().toDouble(),
+                                doc.data?.get("read_status") as Boolean,
+                                doc.data?.get("agreed_status") as Boolean,
+                                doc.data?.get("visibility") as Boolean,
+                                doc.data?.get("note").toString(),
+                                doc.id,
+                            )
+                        )
+                    }
+
+                } else {
+                    updatedStorySnapshotData.postValue(null)
+                    Log.d(ContentValues.TAG, "No such document story agreed true")
                 }
             }
     }
@@ -300,7 +339,7 @@ class SnapshotRepository: SnapshotService{
 
                 if (snapshot != null && !snapshot.isEmpty) {
                     for (doc in snapshot.documents){
-                        Log.d(ContentValues.TAG, "DocumentSnapshot data session: ${doc.data}")
+                        Log.d(ContentValues.TAG, "DocumentSnapshot data backlog: ${doc.data}")
                         backlogCreatedSnapshotData.postValue(
                             Backlog(
                                 doc.data?.get("created_at").toString(),

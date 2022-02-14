@@ -17,11 +17,13 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
     val sessionStoryList: MutableLiveData<SessionStoriesResponse?> = apiController.sessionStoriesResponseMutableLiveData
     val tableCardSent: MutableLiveData<TableCardResponse?> = apiController.tableCardResponseMutableLiveData
     val currentStorySnapshot: MutableLiveData<SessionStory?> = snapshotRepository.currentStorySnapshotData
+    val updatedStorySnapshot: MutableLiveData<SessionStory?> = snapshotRepository.updatedStorySnapshotData
     val isAllStoryList : MutableLiveData<Boolean> = MutableLiveData()
     val goToHomeData : MutableLiveData<Boolean> = MutableLiveData()
     val sessionSnapshotData : MutableLiveData<Session?> = snapshotRepository.sessionSnapshotMutableLiveData
     val backlogSnapshotData: MutableLiveData<Backlog?> = snapshotRepository.backlogCreatedSnapshotData
     val backlogStoryListData: MutableLiveData<BacklogStoryResponse?> = apiController.backlogStoriesResponseMutableLiveData
+    val tableCardListSnapshot: MutableLiveData<TableCardResponse?> = snapshotRepository.pokerTableSnapshotData
 
     var storyListToWork : ArrayList<SessionStory> = arrayListOf()
     var cardsOnTable : ArrayList<UserCard> = arrayListOf()
@@ -45,6 +47,10 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
 
     fun getCurrentStorySessionSanpshot(session_id: String){
         snapshotRepository.getFirebaseCurrentStorySnapshot(session_id)
+    }
+
+    fun getUpdatedStorySnapshot(session_id: String){
+        snapshotRepository.getFirebaseUpdatedStorySnapshot(session_id)
     }
 
     fun getPokerTableSnapshot(session_id: String, story_id: String){
@@ -134,6 +140,10 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
         }
     }
 
+    fun clearTableCards(){
+        cardsOnTable.clear()
+    }
+
     fun finishSession(session: Session) {
         session.status = "finished"
         session.finished_at = ProjectUtils().generateTimeStamp()
@@ -143,6 +153,12 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
     fun loadEndoOfListItem(currentStoryLayout: StoryListItemBinding) {
         currentStoryLayout.storyTitle.setText("END OF LIST")
         currentStoryLayout.storyDescription.setText("END OF LIST")
+        currentStoryLayout.storyWeight.setText("0")
+    }
+
+    fun loadStoryStandByListItem(currentStoryLayout: StoryListItemBinding) {
+        currentStoryLayout.storyTitle.setText("Waiting...")
+        currentStoryLayout.storyDescription.setText("Waiting...")
         currentStoryLayout.storyWeight.setText("0")
     }
 
@@ -166,8 +182,13 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
                 "flipCards" -> flipCards(session.session_id!!, cardsOnTable)
                 "finishSession" -> finishSession(session)
                 "goToHome" -> goToHomeData.postValue(true)
+                else -> setTableCard(userCard, session.session_id!!)
             }
         }
+    }
+
+    fun setTableCard(card: UserCard, session_id: String){
+        apiController.setTableCard(card,session_id)
     }
 
     fun createBacklog(session: Session) {

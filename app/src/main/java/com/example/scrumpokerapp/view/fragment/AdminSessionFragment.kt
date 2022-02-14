@@ -53,6 +53,16 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
             SessionViewModelFactory(ApiController(), true)
         )[AdminSessionViewModel::class.java]
 
+        binding.cardRecycler.apply {
+            layoutManager = LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false)
+            adapter = UserCardAdapter(
+                sessionViewModel.cardsOnTable,
+                this@AdminSessionFragment,
+                "tableCard",
+                (activity as? MainActivity)?.mainActivityViewModel?.getUserProfile()?.uid!!
+            )
+        }
+
         //Carga de controles
         sessionViewModel.getDeckByUserRole(
             ProjectUtils().getRoleAsString(
@@ -87,6 +97,10 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
 
         //Cargar snapshot de la sesion activa
         sessionViewModel.getSessionSnapshot(session.value?.session_id.toString())
+
+        //Cargar snapshot de historia actualizada
+        sessionViewModel.getUpdatedStorySnapshot(session.value?.session_id.toString())
+
         //Finaliza Carga de snapshots//
 
         //Cargar historias a trabajar
@@ -127,13 +141,26 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
         sessionViewModel.currentStorySnapshot.observe(viewLifecycleOwner, Observer {
             if (it != null){
                 Log.i("Current Story Data: ","SNAPSHOT: " + it.transformToJASONtxt())
-                if(it.agreed_status == true){
-                    sessionViewModel.clearTable(session.value?.session_id.toString(), it.doc_id.toString())
-                    sessionViewModel.getClearPokerTableSnapshot(session.value?.session_id.toString())
-                } else {
-                    sessionViewModel.loadStoryItem(binding.currentStoryLayout, it)
-//                    sessionViewModel.getPokerTableSnapshot(session.value?.session_id.toString(), it.doc_id.toString())
-                }
+                sessionViewModel.loadStoryItem(binding.currentStoryLayout, it)
+                //Cargar snapshot de la mesa
+                sessionViewModel.getPokerTableSnapshot(session.value?.session_id.toString(), it.doc_id!!)
+            } else {
+                Log.i("Story List: ","WAITING...")
+                sessionViewModel.loadStoryStandByListItem(binding.currentStoryLayout)
+                sessionViewModel.getSessionStories(session.value?.session_id.toString())
+            }
+        })
+
+        sessionViewModel.updatedStorySnapshot.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                sessionViewModel.clearTable(
+                    session.value?.session_id.toString(),
+                    it.doc_id.toString()
+                )
+
+                Log.i("Story List: ","UPDATED!")
+                sessionViewModel.loadStoryStandByListItem(binding.currentStoryLayout)
+                sessionViewModel.getSessionStories(session.value?.session_id.toString())
             }
         })
 
@@ -145,14 +172,16 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
             }
         })
 
-        //observer de la accion seleccionada
-        sessionViewModel.tableCardSent.observe(viewLifecycleOwner, Observer {
+        //Observer de la mesa
+        sessionViewModel.tableCardListSnapshot.observe(viewLifecycleOwner, Observer {
             if(it != null){
-                sessionViewModel.getCurrentCardSentData(
-                    session.value?.session_id.toString(),
-                    (activity as? MainActivity)?.mainActivityViewModel?.getUserProfile()?.uid!!
-                )
+                sessionViewModel.loadTableCards(it.data)
+            } else {
+                sessionViewModel.clearTableCards()
             }
+
+            //Recargar adapter de cartas en mesa
+            binding.cardRecycler.adapter?.notifyDataSetChanged()
         })
 
         sessionViewModel.goToHomeData.observe(viewLifecycleOwner, Observer {
@@ -236,29 +265,7 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
         }*/
 
         //Observer de la mesa
-        /*sessionViewModel.tableData.observe(viewLifecycleOwner, Observer {
-            if(it != null){
-                sessionViewModel.loadTableCards(it.data)
-                //Recargar adapter de cartas en mesa
-                binding.cardRecycler.apply {
-                    layoutManager = LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false)
-                    adapter = UserCardAdapter(it.data, this@AdminSessionFragment, "tableCard", sessionViewModel.currentUser.uid!!)
-                }
-            }
-        })*/
-
-        /*sessionViewModel.clearTableData.observe(viewLifecycleOwner, Observer {
-            if(it != null){
-                if ((it.message == "Deleted!" && sessionViewModel.currentStorySnapshot.value?.agreed_status == true)){
-                    sessionViewModel.currentStorySnapshot.postValue(null)
-                }
-                //Vaciar adapter de cartas en mesa
-                binding.cardRecycler.apply {
-                    layoutManager = LinearLayoutManager(context,LinearLayoutManager.HORIZONTAL,false)
-                    adapter = UserCardAdapter(it.data, this@AdminSessionFragment, "tableCard", sessionViewModel.currentUser.uid!!)
-                }
-            }
-        })*/
+        /**/
 
         /*sessionViewModel.userUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
             if(it != null){
