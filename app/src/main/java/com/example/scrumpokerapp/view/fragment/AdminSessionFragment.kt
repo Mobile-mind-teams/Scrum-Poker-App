@@ -1,10 +1,12 @@
 package com.example.scrumpokerapp.view.fragment
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -15,17 +17,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.scrumpokerapp.R
 import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentSessionBinding
-import com.example.scrumpokerapp.model.Project
-import com.example.scrumpokerapp.model.Session
-import com.example.scrumpokerapp.model.UserCard
+import com.example.scrumpokerapp.model.*
 import com.example.scrumpokerapp.utils.ProjectUtils
 import com.example.scrumpokerapp.view.activity.MainActivity
+import com.example.scrumpokerapp.view.adapter.SessionStoryAdapter
 import com.example.scrumpokerapp.view.adapter.UserCardAdapter
 import com.example.scrumpokerapp.view.listener.CustomCardItemListener
+import com.example.scrumpokerapp.view.listener.CustomStoryItemListener
 import com.example.scrumpokerapp.viewmodel.AdminSessionViewModel
 import com.example.scrumpokerapp.viewmodel.SessionViewModelFactory
 
-class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), CustomCardItemListener {
+class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), CustomCardItemListener, CustomStoryItemListener {
 
     private lateinit var sessionViewModel: AdminSessionViewModel
 
@@ -63,6 +65,11 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
             )
         }
 
+        binding.storyRecycler.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = SessionStoryAdapter(sessionViewModel.storyListToWork, this@AdminSessionFragment)
+        }
+
         //Carga de controles
         sessionViewModel.getDeckByUserRole(
             ProjectUtils().getRoleAsString(
@@ -89,8 +96,6 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
         })
 
         //Inicia Carga de snapshots//
-        //Cargar snapshot de backlog
-        //sessionViewModel.getBacklogSnapshot(session.value?.session_id.toString())
 
         //Cargar snapshot de la historia activa
         sessionViewModel.getCurrentStorySessionSanpshot(session.value?.session_id.toString())
@@ -100,6 +105,9 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
 
         //Cargar snapshot de historia actualizada
         sessionViewModel.getUpdatedStorySnapshot(session.value?.session_id.toString())
+
+        //Cargar snapshot de backlog
+        sessionViewModel.getBacklogSnapshot(session.value?.session_id.toString())
 
         //Finaliza Carga de snapshots//
 
@@ -112,9 +120,7 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
         sessionViewModel.sessionStoryList.observe(viewLifecycleOwner, Observer {
             if(it != null){
                 sessionViewModel.loadSessionStories(it.data)
-                if(sessionViewModel.sessionSnapshotData.value?.status == "finished"){
-                    sessionViewModel.validateBacklog(session.value!!)
-                }
+                binding.storyRecycler.adapter?.notifyDataSetChanged()
             } else {
                 //Capturar error de carga de historias a backlog
                 binding.progressBar.visibility = View.INVISIBLE
@@ -125,14 +131,9 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
             if (it != null){
                 if (it.status == "onBreak"){
                     goToHome()
-                } else if (it.status == "finished" && !(activity as? MainActivity)?.mainActivityViewModel?.isProjectOwner()!!){
-                    sessionViewModel.updateAdminStatus(
-                        (activity as? MainActivity)?.mainActivityViewModel?.getUserProfile()!!
-                    )
-                }
-                else if (it.status == "finished" && (activity as? MainActivity)?.mainActivityViewModel?.isProjectOwner()!!){
+                } else if (it.status == "finished"){
                     binding.progressBar.visibility = View.VISIBLE
-                    sessionViewModel.getStoriesForBacklog(session.value?.session_id.toString())
+                    sessionViewModel.validateBacklog(session.value!!)
                 }
             }
         })
@@ -146,6 +147,7 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
                 sessionViewModel.getPokerTableSnapshot(session.value?.session_id.toString(), it.doc_id!!)
             } else {
                 Log.i("Story List: ","WAITING...")
+                sessionViewModel.canSend = true
                 sessionViewModel.loadStoryStandByListItem(binding.currentStoryLayout)
                 sessionViewModel.getSessionStories(session.value?.session_id.toString())
             }
@@ -153,12 +155,11 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
 
         sessionViewModel.updatedStorySnapshot.observe(viewLifecycleOwner, Observer {
             if (it != null){
-                sessionViewModel.clearTable(
-                    session.value?.session_id.toString(),
-                    it.doc_id.toString()
-                )
+                sessionViewModel.cardsOnTable.clear()
+                binding.cardRecycler.adapter?.notifyDataSetChanged()
 
                 Log.i("Story List: ","UPDATED!")
+                sessionViewModel.unlockLaunchStory = true
                 sessionViewModel.loadStoryStandByListItem(binding.currentStoryLayout)
                 sessionViewModel.getSessionStories(session.value?.session_id.toString())
             }
@@ -192,94 +193,70 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
             }
         })
 
-        /*if (ProjectUtils().isProjectOwner(
-                sessionViewModel.currentUser.role
-        )){
-            //Para PO
-
-            //Iniciar MutableLiveData de backlogStoryListData, projectUpdateMutableLiveData, goToHome
-            sessionViewModel.backlogStoryListData.postValue(null)
-
-            sessionViewModel.projectUpdateMutableLiveData.postValue(null)
-
-            sessionViewModel.backlogSnapshotData.observe(viewLifecycleOwner, Observer {
-                if (it != null ){
-                    //Backlog Creado
-
-                    //Agregar Historias
-                    sessionViewModel.addStoriesToBacklog(
-                        sessionViewModel.storyListToWork
-                    )
+        sessionViewModel.showStoryListRecycler.observe(viewLifecycleOwner, Observer {
+            if(it != null) {
+                if(it){
+                    sessionViewModel.unlockLaunchStory = false
+                    binding.cardRecycler.visibility = View.GONE
+                    binding.storyRecycler.visibility = View.VISIBLE
                 } else {
-                    //Capturar error de backlog no creado
-                    binding.progressBar.visibility = View.INVISIBLE
+                    binding.cardRecycler.visibility = View.VISIBLE
+                    binding.storyRecycler.visibility = View.GONE
                 }
-            })
+            }
+        })
 
-            sessionViewModel.backlogStoryListData.observe(viewLifecycleOwner, Observer {
-                if (it != null){
-                    //Lista de historias Creada, actualizar proyecto
-                    sessionViewModel.updateProjectStatus(
-                        Project(
-                            sessionViewModel.sessionObject.project_name,
-                            sessionViewModel.sessionObject.project_id,
-                            session.value?.session_id.toString(),
-                            sessionViewModel.backlogSnapshotData.value?.doc_id,
-                            sessionViewModel.getProjectStatus()
-                        )
-                    )
-                } else {
-                    //Capturar error de lista de backlog no creada
-                    binding.progressBar.visibility = View.INVISIBLE
-                }
-            })
+        sessionViewModel.backlogSnapshotData.observe(viewLifecycleOwner, Observer {
+            if (it != null ){
+                //Backlog Creado
+                //Cargar snapshot de historias de backlog
+                sessionViewModel.backlogID = it.doc_id.toString()
+                sessionViewModel.getBacklogStoryListSnapshot(sessionViewModel.backlogID)
 
-            sessionViewModel.projectUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
-                if (it != null) {
-                    sessionViewModel.updateAdminStatus(sessionViewModel.currentUser)
-                } else {
-                    //Capturar error de actualizacion de proyecto
-                    binding.progressBar.visibility = View.INVISIBLE
-                }
-            })
-
-            sessionViewModel.adminUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
-                if(it != null){
-                    (activity as? MainActivity)?.mainActivityViewModel?.userData?.postValue(
-                        sessionViewModel.updateUserProfile(
-                            (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
-                        )
-                    )
-
-                    Toast.makeText(context,"Historias Agregadas a Backlog!", Toast.LENGTH_SHORT).show()
-
-                    Toast.makeText(context,"Backlog Creado!", Toast.LENGTH_SHORT).show()
-
-                    binding.progressBar.visibility = View.INVISIBLE
-                    goToHome()
-                } else {
-                    //Capturar error de actualizacion de proyecto
-                    binding.progressBar.visibility = View.INVISIBLE
-                }
-            })
-        }*/
-
-        //Observer de la mesa
-        /**/
-
-        /*sessionViewModel.userUpdateMutableLiveData.observe(viewLifecycleOwner, Observer {
-            if(it != null){
-                (activity as? MainActivity)?.mainActivityViewModel?.userData?.postValue(
-                    sessionViewModel.updateUserProfile(
-                        (activity as? MainActivity)?.mainActivityViewModel?.userData?.value
-                    )
-                )
-                goToHome()
+                sessionViewModel.getStoriesForBacklog(session.value?.session_id!!)
             } else {
-                //Capturar error de actualizacion de proyecto
+                //Capturar error de backlog no creado
                 binding.progressBar.visibility = View.INVISIBLE
             }
-        })*/
+        })
+
+        sessionViewModel.backlogStoryList.observe(viewLifecycleOwner, Observer {
+            if (it != null ){
+                //Historias para el backlog
+                sessionViewModel.addStoriesToBacklog(sessionViewModel.backlogStoryList.value?.data!!)
+
+                //Actualizar status de proyecto
+                sessionViewModel.updateProjectStatus(
+                    Project(
+                        session.value?.project_name,
+                        session.value?.project_id,
+                        session.value?.session_id,
+                        sessionViewModel.backlogID,
+                        sessionViewModel.getProjectStatus()
+                    )
+                )
+            } else {
+                //Capturar error de backlog no creado
+                binding.progressBar.visibility = View.INVISIBLE
+            }
+        })
+
+        sessionViewModel.projectLiveData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                sessionViewModel.updateAdminStatus(
+                    (activity as? MainActivity)?.mainActivityViewModel?.getUserProfile()
+                )
+            }
+        })
+
+        sessionViewModel.adminLiveData.observe(viewLifecycleOwner, Observer {
+            if (it != null){
+                (activity as? MainActivity)?.mainActivityViewModel?.updateUserProfile(it.data.get(0))
+                Toast.makeText(context,"Sesion Finalizada!", Toast.LENGTH_SHORT).show()
+                binding.progressBar.visibility = View.INVISIBLE
+                goToHome()
+            }
+        })
 
         return binding.root
     }
@@ -297,5 +274,44 @@ class AdminSessionFragment(val session: MutableLiveData<Session>) : Fragment(), 
             userCard,
             ProjectUtils().isTableCard(type)
         )
+    }
+
+    override fun getSelectedItem(story: BacklogStory) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getSelectedItem(adapterStory: SessionStory) {
+        Log.i("Current Story Data: ","ADAPTER ITEM: " + adapterStory.transformToJASONtxt())
+        showConfirmDialog(adapterStory)
+    }
+
+    fun showConfirmDialog(story: SessionStory) {
+
+        val alertDialog = AlertDialog.Builder(context).create()
+        alertDialog.setTitle("Lanzar Historia")
+        alertDialog.setMessage(
+            "Esta seguro de lanzar la siguiente historia?\n" +
+            story.transformToDialogAlertText()
+        )
+
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Si") { dialog, which ->
+            sessionViewModel.launchStory(story, session.value?.session_id!!)
+            sessionViewModel.showStoryListRecycler.postValue(false)
+            dialog.dismiss()
+        }
+
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No") { dialog, which ->
+            dialog.dismiss()
+        }
+
+        alertDialog.show()
+
+        val btnPositive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        val btnNegative = alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+
+        val layoutParams = btnPositive.layoutParams as LinearLayout.LayoutParams
+        layoutParams.weight = 10f
+        btnPositive.layoutParams = layoutParams
+        btnNegative.layoutParams = layoutParams
     }
 }

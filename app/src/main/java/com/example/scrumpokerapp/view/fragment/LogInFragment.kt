@@ -46,7 +46,8 @@ class LogInFragment : Fragment() {
         binding.btnLogIn.setOnClickListener {
             logInViewModel.login(
                 binding.etEmail.text.toString(),
-                binding.etPassword.text.toString()
+//                binding.etPassword.text.toString()
+            "arkus123"
             )
         }
 

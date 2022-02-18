@@ -3,13 +3,11 @@ package com.example.scrumpokerapp.repository
 import android.content.ContentValues
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.example.scrumpokerapp.model.Backlog
-import com.example.scrumpokerapp.model.Session
-import com.example.scrumpokerapp.model.SessionStory
-import com.example.scrumpokerapp.model.UserCard
+import com.example.scrumpokerapp.model.*
 import com.example.scrumpokerapp.service.DataBaseInstance
 import com.example.scrumpokerapp.service.SnapshotService
 import com.example.scrumpokerapp.service.response.BacklogResponse
+import com.example.scrumpokerapp.service.response.BacklogStoryResponse
 import com.example.scrumpokerapp.service.response.TableCardResponse
 
 const val DATABASE_INSTANCE_TYPE = "Firestore"
@@ -23,6 +21,7 @@ class SnapshotRepository: SnapshotService{
     val clearPokerTableSnapshotData : MutableLiveData<TableCardResponse?>
     val currentCardSentSnapshotData : MutableLiveData<UserCard?>
     val backlogCreatedSnapshotData : MutableLiveData<Backlog?>
+    val backlogStoryListSnapshotData : MutableLiveData<BacklogStoryResponse?>
     val updatedStorySnapshotData : MutableLiveData<SessionStory?>
 
     constructor(){
@@ -33,6 +32,7 @@ class SnapshotRepository: SnapshotService{
         clearPokerTableSnapshotData = MutableLiveData()
         currentCardSentSnapshotData = MutableLiveData()
         backlogCreatedSnapshotData = MutableLiveData()
+        backlogStoryListSnapshotData = MutableLiveData()
         updatedStorySnapshotData = MutableLiveData()
     }
 
@@ -222,7 +222,7 @@ class SnapshotRepository: SnapshotService{
                 if (snapshot != null && !snapshot.isEmpty) {
                     var cardsOnTable : ArrayList<UserCard> = arrayListOf()
                     for (doc in snapshot.documents){
-                        Log.d(ContentValues.TAG, "DocumentSnapshot data table-card: ${doc.data}")
+                        Log.d(ContentValues.TAG, "DocumentSnapshot pokerTable data table-card: ${doc.data}")
                         var card = UserCard(
                             doc.data?.get("user_id").toString(),
                             doc.data?.get("value").toString().toDouble(),
@@ -251,7 +251,7 @@ class SnapshotRepository: SnapshotService{
                             "Deleted!"
                         )
                     )
-                    Log.d(ContentValues.TAG, "Cards Deleted")
+                    Log.d(ContentValues.TAG, "Cards Deleted pokerTable")
                     Log.d(ContentValues.TAG, "No such document table-card")
                 }
             }
@@ -357,6 +357,46 @@ class SnapshotRepository: SnapshotService{
                     backlogCreatedSnapshotData.postValue(null)
                     Log.d(ContentValues.TAG, "No such document backlog")
                 }
+            }
+    }
+
+    override fun getFirebaseBacklogStoryListSnapshot(backlog_id: String) {
+        var storyList: ArrayList<BacklogStory> = arrayListOf()
+        databaseInstance.firestoreInstance.collection("backlog")
+            .document(backlog_id)
+            .collection("story")
+            .addSnapshotListener{ snapshot, e ->
+
+                if (e != null) {
+                    Log.w(ContentValues.TAG, "Listen failed.", e)
+                    backlogStoryListSnapshotData.postValue(null)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null && !snapshot.isEmpty) {
+                    for (doc in snapshot.documents){
+                        Log.d(ContentValues.TAG, "DocumentSnapshot data backlog-story: ${doc.data}")
+                        val story = BacklogStory(
+                            doc.data?.get("title").toString(),
+                            doc.data?.get("description").toString(),
+                            doc.data?.get("weight").toString().toDouble()
+                        )
+
+                        storyList.add(story)
+                    }
+
+                } else {
+                    backlogStoryListSnapshotData.postValue(null)
+                    Log.d(ContentValues.TAG, "No such document backlog_list")
+                }
+            }.let {
+                backlogStoryListSnapshotData.postValue(
+                    BacklogStoryResponse(
+                        "backlog-story",
+                        "Success!",
+                        storyList
+                    )
+                )
             }
     }
 }

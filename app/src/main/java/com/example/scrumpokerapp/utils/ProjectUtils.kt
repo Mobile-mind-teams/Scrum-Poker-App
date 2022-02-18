@@ -15,6 +15,17 @@ class ProjectUtils {
             .format(Instant.now())
     }
 
+    fun generateModifiedTimeStamp(session: Session): String{
+        return if (session.status == "complementary") {
+            DateTimeFormatter
+                .ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")
+                .withZone(ZoneOffset.UTC)
+                .format(Instant.now())
+        } else {
+            "-"
+        }
+    }
+
     fun isProjectOwner(role: Int?): Boolean{
         return role == 1
     }

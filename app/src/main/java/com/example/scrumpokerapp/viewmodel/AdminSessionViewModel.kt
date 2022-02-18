@@ -15,19 +15,24 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
     val snapshotRepository: SnapshotRepository = SnapshotRepository()
     val deckData: MutableLiveData<CardsResponse?> = apiController.cardsResponseMutableLiveData
     val sessionStoryList: MutableLiveData<SessionStoriesResponse?> = apiController.sessionStoriesResponseMutableLiveData
-    val tableCardSent: MutableLiveData<TableCardResponse?> = apiController.tableCardResponseMutableLiveData
+    val backlogStoryList: MutableLiveData<SessionStoriesResponse?> = apiController.sessionStoriesForBacklogResponseMutableLiveData
     val currentStorySnapshot: MutableLiveData<SessionStory?> = snapshotRepository.currentStorySnapshotData
     val updatedStorySnapshot: MutableLiveData<SessionStory?> = snapshotRepository.updatedStorySnapshotData
     val isAllStoryList : MutableLiveData<Boolean> = MutableLiveData()
     val goToHomeData : MutableLiveData<Boolean> = MutableLiveData()
     val sessionSnapshotData : MutableLiveData<Session?> = snapshotRepository.sessionSnapshotMutableLiveData
     val backlogSnapshotData: MutableLiveData<Backlog?> = snapshotRepository.backlogCreatedSnapshotData
-    val backlogStoryListData: MutableLiveData<BacklogStoryResponse?> = apiController.backlogStoriesResponseMutableLiveData
     val tableCardListSnapshot: MutableLiveData<TableCardResponse?> = snapshotRepository.pokerTableSnapshotData
+    val projectLiveData: MutableLiveData<ProjectResponse?> = apiController.projectUpdateResponseMutableLiveData
+    val adminLiveData: MutableLiveData<UsersResponse?> = apiController.adminResponseMutableLiveData
+    val showStoryListRecycler: MutableLiveData<Boolean> = MutableLiveData()
 
     var storyListToWork : ArrayList<SessionStory> = arrayListOf()
     var cardsOnTable : ArrayList<UserCard> = arrayListOf()
     var areAllSessionStoriesWithWeightValue : Boolean = true
+    var unlockLaunchStory: Boolean = true
+    var canSend: Boolean = true
+    var backlogID = ""
 
     fun getDeckByUserRole(role_string: String) {
         apiController.getDeckByUserRole(role_string)
@@ -57,15 +62,12 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
         snapshotRepository.getFirebasePokerTableSnapshot(session_id, story_id)
     }
 
-    fun getClearPokerTableSnapshot(session_id: String){
-        snapshotRepository.getFirebaseClearPokerTableSnapshot(session_id)
-    }
-
-    fun getCurrentCardSentData(session_id: String, user_id: String){
-        snapshotRepository.getFirebaseCurrentCardSentSnapshot(session_id, user_id)
+    fun getBacklogStoryListSnapshot(backlog_id: String){
+        snapshotRepository.getFirebaseBacklogStoryListSnapshot(backlog_id)
     }
 
     fun loadSessionStories(storyList : List<SessionStory>){
+        storyListToWork.clear()
         for (story in storyList){
             if (story.weight == 0.0){
                 areAllSessionStoriesWithWeightValue = false
@@ -74,23 +76,16 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
         }
     }
 
-    fun launchStory(session_id: String, current_story: SessionStory?){
-        var story : SessionStory = popStory(storyListToWork)
-        if (story.doc_id != null && current_story == null){
-            apiController.updateStoryFrom(story, session_id, "session")
-        } else if (story.doc_id != null && current_story != null) {
-            current_story.visibility = false
-            apiController.updateStoryFrom(current_story, session_id, "session")
-            apiController.updateStoryFrom(story, session_id, "session")
-        } else if (current_story != null) {
-            apiController.updateStoryFrom(current_story, session_id, "session")
-            isAllStoryList.postValue(true)
-        }
+    fun launchStory(story: SessionStory, session_id: String){
+        story.visibility = true
+        story.read_status = true
+        apiController.updateStoryFrom(story, session_id, "session")
     }
 
     fun goToBreak(session: Session){
         session.status = "onBreak"
         currentStorySnapshot.value?.visibility = false
+        apiController.updateStoryFrom(currentStorySnapshot.value!!, session.session_id.toString(), "session")
         apiController.updateSession(session)
     }
 
@@ -98,7 +93,6 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
         currentStorySnapshot.value?.weight = value
         currentStorySnapshot.value?.agreed_status = true
         currentStorySnapshot.value?.visibility = false
-        popStory(storyListToWork)
         apiController.updateStoryFrom(currentStorySnapshot.value!!, session_id, "session")
     }
 
@@ -106,19 +100,6 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
         currentStorySnapshot.value?.note = note
         currentStorySnapshot.value?.agreed_status = true
         apiController.updateStoryFrom(currentStorySnapshot.value!!, session_id, "session")
-    }
-
-    private fun popStory(storyListToWork: ArrayList<SessionStory>): SessionStory {
-        var sessionStory : SessionStory
-        if (storyListToWork.size > 0){
-            sessionStory = storyListToWork.get(0)
-            sessionStory.visibility = true
-            sessionStory.read_status = true
-            storyListToWork.removeAt(0)
-        } else {
-            sessionStory = SessionStory()
-        }
-        return sessionStory
     }
 
     fun clearTable(session_id: String, story_id: String) {
@@ -173,11 +154,15 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
             when(userCard.action){
                 "setWeight" -> updateStoryValue(session.session_id!!, userCard.value!!)
                 "goToBreak" -> goToBreak(session)
-                "addNote" -> addStoryNote(session.session_id!!, "Nota escrita por usuario")
+                "addNote" -> addStoryNote(session.session_id!!, selectNote(userCard.name.toString()))
             }
         } else {
             when(userCard.action){
-                "launchStory" -> launchStory(session.session_id!!, currentStorySnapshot.value)
+                "launchStory" -> {
+                    if (unlockLaunchStory) {
+                        showStoryListRecycler.postValue(true)
+                    }
+                }
                 "repeatTurn" -> repeatTurn(session.session_id!!, currentStorySnapshot.value?.doc_id!!)
                 "flipCards" -> flipCards(session.session_id!!, cardsOnTable)
                 "finishSession" -> finishSession(session)
@@ -187,8 +172,15 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
         }
     }
 
+    private fun selectNote(card_name: String): String {
+        return if(card_name == "infinito") "Particionar historia" else "Redefinir historia con cliente"
+    }
+
     fun setTableCard(card: UserCard, session_id: String){
-        apiController.setTableCard(card,session_id)
+        if (canSend){
+            canSend = false
+            apiController.setTableCard(card,session_id)
+        }
     }
 
     fun createBacklog(session: Session) {
@@ -213,9 +205,7 @@ class AdminSessionViewModel (val apiController: ApiController) : ViewModel() {
     }
 
     fun addStoriesToBacklog(storyList: List<SessionStory>) {
-        if (backlogStoryListData.value == null){
-            apiController.addStoriesToBacklog(storyList, backlogSnapshotData.value?.doc_id!!)
-        }
+        apiController.addStoriesToBacklog(storyList, backlogSnapshotData.value?.doc_id!!)
     }
 
     fun getStoriesForBacklog(session_id: String) {

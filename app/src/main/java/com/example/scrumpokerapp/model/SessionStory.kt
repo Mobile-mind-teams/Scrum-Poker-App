@@ -58,4 +58,8 @@ class SessionStory {
                 "\tdoc_id: ${doc_id},\n" +
                 "\t}"
     }
+
+    fun transformToDialogAlertText(): String {
+        return "Titulo:\n\t${title}\nDescripcion:\n\t${description}"
+    }
 }

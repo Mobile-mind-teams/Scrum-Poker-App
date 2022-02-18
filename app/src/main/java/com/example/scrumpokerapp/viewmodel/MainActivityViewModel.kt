@@ -2,6 +2,7 @@ package com.example.scrumpokerapp.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.scrumpokerapp.model.User
 import com.example.scrumpokerapp.persistance.UserProfile
 
 class MainActivityViewModel : ViewModel(){
@@ -24,5 +25,9 @@ class MainActivityViewModel : ViewModel(){
 
     fun showCreateSession(): Boolean {
         return isProjectOwner() && isAvailable()
+    }
+
+    fun updateUserProfile(user: User){
+        userData.value?.status = user.status
     }
 }

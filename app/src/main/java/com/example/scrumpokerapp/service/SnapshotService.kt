@@ -18,4 +18,6 @@ interface SnapshotService {
     fun getFirebaseCurrentCardSentSnapshot(session_id: String, user_id: String)
 
     fun getFirebaseCreatedBacklogSnapshot(session_id: String)
+
+    fun getFirebaseBacklogStoryListSnapshot(backlog_id: String)
 }

@@ -50,14 +50,6 @@ class HomeViewModel (
 
     fun processActionByUserRole(session: Session, isProjectOwner: Boolean) {
         when(session.status){
-            "onBreak" -> {
-                if(isProjectOwner){
-                    updateSessionStatus(session)
-                } else {
-                    sessionStatusData.postValue(false)
-                    Toast.makeText(application,"Seguimos en Break!", Toast.LENGTH_SHORT).show()
-                }
-            }
             "finished" -> {
                 sessionStatusData.postValue(false)
                 Toast.makeText(application,"La sesion ha terminado", Toast.LENGTH_SHORT).show()
@@ -66,7 +58,19 @@ class HomeViewModel (
                 sessionStatusData.postValue(true)
                 Toast.makeText(application,"Has entrado a la sesion", Toast.LENGTH_SHORT).show()
             }
+            else -> {
+                if(isProjectOwner){
+                    updateSessionStatus(session)
+                } else {
+                    sessionStatusData.postValue(false)
+                    Toast.makeText(application, obtenerMensaje(session.status), Toast.LENGTH_SHORT).show()
+                }
+            }
         }
+    }
+
+    private fun obtenerMensaje(status: String?): String {
+        return  if(status == "new") "Aun no empieza la sesion!" else "Seguimos en Break!"
     }
 
     fun loadUserSessionSnapshot(email: String){

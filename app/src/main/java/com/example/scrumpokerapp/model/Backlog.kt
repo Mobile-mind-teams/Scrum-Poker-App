@@ -14,6 +14,20 @@ class Backlog {
     constructor(){}
 
     constructor(
+        modified_at: String?,
+        project_id: String?,
+        project_name: String?,
+        status: String?,
+        session_id: String?
+    ) {
+        this.modified_at = modified_at
+        this.project_id = project_id
+        this.project_name = project_name
+        this.status = status
+        this.session_id = session_id
+    }
+
+    constructor(
         created_at: String?,
         modified_at: String?,
         project_id: String?,

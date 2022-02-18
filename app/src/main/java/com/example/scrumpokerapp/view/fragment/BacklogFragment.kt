@@ -14,6 +14,7 @@ import com.example.scrumpokerapp.controller.ApiController
 import com.example.scrumpokerapp.databinding.FragmentBacklogBinding
 import com.example.scrumpokerapp.model.Backlog
 import com.example.scrumpokerapp.model.BacklogStory
+import com.example.scrumpokerapp.model.SessionStory
 import com.example.scrumpokerapp.view.activity.MainActivity
 import com.example.scrumpokerapp.view.adapter.BacklogAdapter
 import com.example.scrumpokerapp.view.adapter.BacklogStoryAdapter
@@ -102,6 +103,10 @@ class BacklogFragment : Fragment(), CustomBacklogListener, CustomStoryItemListen
 
     override fun getSelectedItem(story: BacklogStory) {
         (activity as? MainActivity)?.replaceFragment(BacklogFragment.newInstance(), "BacklogFragment")
+    }
+
+    override fun getSelectedItem(story: SessionStory) {
+        TODO("Not yet implemented")
     }
 
 

@@ -17,6 +17,12 @@ class BacklogStory {
         this.sid = sid
     }
 
+    constructor(title: String?, description: String?, weight: Double?) {
+        this.title = title
+        this.description = description
+        this.weight = weight
+    }
+
     override fun toString(): String {
         return "BacklogStroy => {\n" +
                 "title: ${title},\n" +
